@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LinuxHub — Master the Terminal</title>
+<title>LinuxForge — Master the Terminal</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -554,7 +554,7 @@
       <div class="logo">
         <div class="logo-icon">$_</div>
         <div>
-          <div class="logo-text">LinuxHub</div>
+          <div class="logo-text">LinuxForge</div>
           <div class="logo-sub">master the terminal</div>
         </div>
       </div>
@@ -581,7 +581,7 @@
       <div class="topbar-breadcrumb" id="breadcrumb">
         <span style="color:var(--text3)">~</span>
         <span style="color:var(--text3)">/</span>
-        <span>LinuxHub</span>
+        <span>LinuxForge</span>
       </div>
       <div class="topbar-stats">
         <div class="stat-chip"><div class="stat-dot" style="background:var(--green)"></div><span id="stat-cmds">60 commands</span></div>
@@ -603,13 +603,13 @@
             <div class="dot dot-y"></div>
             <div class="dot dot-g"></div>
           </div>
-          <span class="terminal-title">bash — user@linuxhub</span>
+          <span class="terminal-title">bash — user@linuxforge</span>
           <div class="terminal-tab">LIVE</div>
         </div>
         <div class="terminal-quick-btns" id="quickBtns"></div>
         <div class="terminal-body" id="terminalBody"></div>
         <div class="terminal-input-row">
-          <span class="terminal-prompt">user@linuxhub:~$</span>
+          <span class="terminal-prompt">user@linuxforge:~$</span>
           <input class="terminal-input" id="termInput" placeholder="type a command..." autocomplete="off" autocorrect="off" spellcheck="false">
           <button class="terminal-run-btn" onclick="runTermCmd()">↵ Run</button>
         </div>
@@ -834,7 +834,7 @@ const commands = [
       {flag:'-E', desc:'Show $ at end of each line', ex:'cat -E file.txt'},
     ],
     examples:[
-      {label:'View file', cmd:'cat /etc/hostname', out:`linuxhub`, note:'Simple file content display'},
+      {label:'View file', cmd:'cat /etc/hostname', out:`linuxforge`, note:'Simple file content display'},
       {label:'View with line numbers', cmd:'cat -n script.sh', out:`     1\t#!/bin/bash\n     2\techo "Hello"\n     3\texit 0`, note:'Numbers help when debugging'},
       {label:'Concatenate files', cmd:'cat header.txt body.txt footer.txt > full.txt', out:`# Three files merged into one`, note:'Create combined output'},
     ],
@@ -1009,7 +1009,7 @@ const commands = [
     ],
     examples:[
       {label:'Check CSV header', cmd:'head -1 data.csv', out:`id,name,email,score,date`, note:'Quickly see column names'},
-      {label:'First 5 lines', cmd:'head -5 README.md', out:`# LinuxHub\n\n> Master the terminal, one command at a time.\n\n## Getting Started`, note:'Quick file preview'},
+      {label:'First 5 lines', cmd:'head -5 README.md', out:`# LinuxForge\n\n> Master the terminal, one command at a time.\n\n## Getting Started`, note:'Quick file preview'},
     ],
     flow:['head reads file from start','Stops after N lines/bytes','Efficient — doesn\'t load rest of file'],
     tip:'head -1 is great for CSV headers. For the last line: tail -1. For line N: sed -n "Np" file.',
@@ -1561,20 +1561,20 @@ let vfs = {
   '/home/alice/Desktop': { type: 'd', children: [] },
   '/home/alice/Documents': { type: 'd', children: ['report.pdf','notes.txt','resume.pdf'] },
   '/home/alice/Downloads': { type: 'd', children: ['ubuntu.iso','archive.tar.gz'] },
-  '/home/alice/projects': { type: 'd', children: ['linuxhub','myapp'] },
-  '/home/alice/projects/linuxhub': { type: 'd', children: ['index.html','app.js','README.md'] },
+  '/home/alice/projects': { type: 'd', children: ['linuxforge','myapp'] },
+  '/home/alice/projects/linuxforge': { type: 'd', children: ['index.html','app.js','README.md'] },
   '/home/alice/projects/myapp': { type: 'd', children: ['main.py','utils.py','requirements.txt'] },
   '/home/alice/.bashrc': { type: 'f', content: 'export PATH=$PATH:~/.local/bin\nalias ll="ls -lah"\nalias gs="git status"' },
   '/home/alice/.bash_history': { type: 'f', content: 'ls -la\ncd projects\ngit status\nsudo apt update' },
   '/var': { type: 'd', children: ['log','www','lib'] },
   '/var/log': { type: 'd', children: ['syslog','auth.log','nginx'] },
-  '/var/log/syslog': { type: 'f', content: 'Mar 15 10:22:31 linuxhub kernel: boot successful\nMar 15 10:22:35 linuxhub sshd: Server listening on 0.0.0.0 port 22\nMar 15 11:45:12 linuxhub sshd: Accepted publickey for alice\nMar 15 12:00:01 linuxhub CRON: (alice) CMD (/home/alice/backup.sh)' },
-  '/var/log/auth.log': { type: 'f', content: 'Mar 15 11:45:12 linuxhub sshd: Accepted publickey for alice from 192.168.1.10\nMar 15 14:22:33 linuxhub sudo: alice : TTY=pts/0 ; USER=root ; COMMAND=/usr/bin/apt update' },
+  '/var/log/syslog': { type: 'f', content: 'Mar 15 10:22:31 linuxforge kernel: boot successful\nMar 15 10:22:35 linuxforge sshd: Server listening on 0.0.0.0 port 22\nMar 15 11:45:12 linuxforge sshd: Accepted publickey for alice\nMar 15 12:00:01 linuxforge CRON: (alice) CMD (/home/alice/backup.sh)' },
+  '/var/log/auth.log': { type: 'f', content: 'Mar 15 11:45:12 linuxforge sshd: Accepted publickey for alice from 192.168.1.10\nMar 15 14:22:33 linuxforge sudo: alice : TTY=pts/0 ; USER=root ; COMMAND=/usr/bin/apt update' },
   '/var/log/nginx': { type: 'd', children: ['access.log','error.log'] },
   '/var/www': { type: 'd', children: ['html'] },
   '/var/www/html': { type: 'd', children: ['index.html'] },
   '/etc': { type: 'd', children: ['hosts','passwd','nginx','ssh'] },
-  '/etc/hosts': { type: 'f', content: '127.0.0.1 localhost\n127.0.1.1 linuxhub\n::1 localhost ip6-localhost ip6-loopback' },
+  '/etc/hosts': { type: 'f', content: '127.0.0.1 localhost\n127.0.1.1 linuxforge\n::1 localhost ip6-localhost ip6-loopback' },
   '/etc/passwd': { type: 'f', content: 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nalice:x:1000:1000:Alice Smith:/home/alice:/bin/bash\nbob:x:1001:1001:Bob Jones:/home/bob:/bin/bash' },
   '/etc/nginx': { type: 'd', children: ['nginx.conf','sites-available'] },
   '/etc/ssh': { type: 'd', children: ['sshd_config','ssh_config'] },
@@ -1617,7 +1617,7 @@ function runCmd(raw) {
   const cmd = parts[0];
   const args = parts.slice(1);
 
-  const prompt = `<div class="t-line"><span class="t-prompt">alice@linuxhub:${cwdPath.replace('/home/alice','~')}$</span> <span class="t-cmd">${escH(raw)}</span></div>`;
+  const prompt = `<div class="t-line"><span class="t-prompt">alice@linuxforge:${cwdPath.replace('/home/alice','~')}$</span> <span class="t-cmd">${escH(raw)}</span></div>`;
 
   switch(cmd) {
     case 'pwd': return prompt + termLine(cwdPath);
@@ -1728,11 +1728,11 @@ function runCmd(raw) {
     case 'echo': return prompt + termLine(escH(args.join(' ')).replace(/\\n/g,'<br>'));
 
     case 'whoami': return prompt + termLine('alice');
-    case 'hostname': return prompt + termLine('linuxhub');
+    case 'hostname': return prompt + termLine('linuxforge');
     case 'date': return prompt + termLine(new Date().toString());
     case 'uptime': return prompt + termLine('10:22:31 up 4 days, 2:15,  2 users,  load average: 0.52, 0.48, 0.44');
     case 'uname':
-      if (args.includes('-a')) return prompt + termLine('Linux linuxhub 5.15.0-100-generic #110-Ubuntu SMP x86_64 GNU/Linux');
+      if (args.includes('-a')) return prompt + termLine('Linux linuxforge 5.15.0-100-generic #110-Ubuntu SMP x86_64 GNU/Linux');
       if (args.includes('-r')) return prompt + termLine('5.15.0-100-generic');
       return prompt + termLine('Linux');
 
@@ -1814,7 +1814,7 @@ function runCmd(raw) {
     case 'help':
     case '--help': {
       return prompt + 
-        termLine('<span class="t-success">LinuxHub Interactive Terminal</span>') +
+        termLine('<span class="t-success">LinuxForge Interactive Terminal</span>') +
         termLine('') +
         termLine('<span class="t-info">Supported commands:</span>') +
         termLine('pwd, ls, cd, cat, mkdir, touch, rm, echo, whoami, hostname') +
@@ -1886,7 +1886,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial terminal greeting
   appendTerminal(
-    termLine(`<span class="t-success">Welcome to LinuxHub Terminal Simulator!</span>`) +
+    termLine(`<span class="t-success">Welcome to LinuxForge Terminal Simulator!</span>`) +
     termLine(`<span class="t-info">Type commands to explore. Try: ls, pwd, cd projects, cat /etc/hosts</span>`) +
     termLine(`<span class="t-info">Type 'help' for available commands. Arrow keys for history, Tab for autocomplete.</span>`) +
     termLine(``)
@@ -1995,7 +1995,7 @@ function selectCmd(id) {
   document.getElementById('breadcrumb').innerHTML = `
     <span style="color:var(--text3)">~</span>
     <span style="color:var(--text3)">/</span>
-    <span style="cursor:pointer;color:var(--text2);" onclick="renderWelcome()">LinuxHub</span>
+    <span style="cursor:pointer;color:var(--text2);" onclick="renderWelcome()">LinuxForge</span>
     <span style="color:var(--text3)">/</span>
     <span style="color:var(--text2)">${cmd.category}</span>
     <span style="color:var(--text3)">/</span>
@@ -2131,7 +2131,7 @@ function renderWelcome() {
   document.getElementById('breadcrumb').innerHTML = `
     <span style="color:var(--text3)">~</span>
     <span style="color:var(--text3)">/</span>
-    <span>LinuxHub</span>
+    <span>LinuxForge</span>
   `;
 
   const begCount = commands.filter(c=>c.level==='beginner').length;

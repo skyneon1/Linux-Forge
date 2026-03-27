@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinuxHub — Master the Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg0: #0a0c10;
+    --bg1: #0f1117;
+    --bg2: #161b22;
+    --bg3: #1e2430;
+    --bg4: #252d3a;
+    --border: #2a3342;
+    --border2: #344055;
+    --green: #39d353;
+    --green2: #26a641;
+    --green3: #1a7f37;
+    --greenDim: #1c3a24;
+    --cyan: #58d0e8;
+    --cyan2: #2aa8c0;
+    --yellow: #e3c75b;
+    --orange: #f0833a;
+    --red: #f85149;
+    --purple: #a78bfa;
+    --text0: #e6edf3;
+    --text1: #b0bac7;
+    --text2: #7d8896;
+    --text3: #4d5664;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Space Grotesk', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg0);
+    color: var(--text0);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── LAYOUT ─────────────────────────────────────────── */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ─── SIDEBAR ─────────────────────────────────────────── */
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg1);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--green3), var(--green2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 16px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .logo-text { font-size: 17px; font-weight: 700; color: var(--text0); letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: var(--text2); font-family: var(--mono); }
+
+  .search-box {
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text0);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 12px 8px 34px;
+    border-radius: 6px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .search-box input:focus { border-color: var(--green2); }
+  .search-box input::placeholder { color: var(--text3); }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 13px;
+  }
+
+  .level-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 20px 0;
+    flex-shrink: 0;
+  }
+  .level-tab {
+    flex: 1;
+    padding: 5px 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .level-tab:hover { border-color: var(--border2); color: var(--text1); }
+  .level-tab.active-beg { background: #162a1e; border-color: var(--green3); color: var(--green); }
+  .level-tab.active-int { background: #1e1e2a; border-color: #5046a0; color: var(--purple); }
+  .level-tab.active-adv { background: #2a1a10; border-color: #9a4820; color: var(--orange); }
+
+  .cmd-list-header {
+    padding: 12px 20px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text3);
+    text-transform: uppercase;
+    font-family: var(--mono);
+    flex-shrink: 0;
+  }
+  .cmd-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 8px 12px;
+  }
+  .cmd-list::-webkit-scrollbar { width: 4px; }
+  .cmd-list::-webkit-scrollbar-track { background: transparent; }
+  .cmd-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .cmd-category { margin-bottom: 4px; }
+  .cat-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 12px;
+    font-size: 11px; font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    font-family: var(--mono);
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .cat-header:hover { background: var(--bg3); }
+  .cat-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text3); flex-shrink: 0;
+  }
+  .cat-arrow { margin-left: auto; transition: transform 0.2s; font-size: 10px; }
+  .cat-arrow.open { transform: rotate(90deg); }
+  .cat-items { display: none; }
+  .cat-items.open { display: block; }
+
+  .cmd-item {
+    display: flex; align-items: center;
+    padding: 7px 12px 7px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 8px;
+  }
+  .cmd-item:hover { background: var(--bg3); }
+  .cmd-item.active { background: var(--bg4); border-left: 2px solid var(--green2); padding-left: 22px; }
+  .cmd-item-name { font-family: var(--mono); font-size: 13px; color: var(--text0); font-weight: 500; }
+  .cmd-item-desc { font-size: 11px; color: var(--text3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+  .level-badge {
+    margin-left: auto;
+    font-size: 9px; font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .lb-beg { background: #162a1e; color: var(--green); }
+  .lb-int { background: #1e1e2a; color: var(--purple); }
+  .lb-adv { background: #2a1a10; color: var(--orange); }
+
+  /* ─── MAIN PANEL ─────────────────────────────────────────── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg0);
+  }
+
+  /* ─── TOP BAR ─────────────────────────────────────────── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 56px;
+    background: var(--bg1);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 16px;
+  }
+  .topbar-breadcrumb {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .topbar-breadcrumb .cmd-name { color: var(--green); font-weight: 600; }
+  .topbar-stats {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .stat-chip {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text2); font-family: var(--mono);
+  }
+  .stat-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* ─── CONTENT AREA ─────────────────────────────────────────── */
+  .content { flex: 1; display: flex; overflow: hidden; }
+
+  /* ─── DOC PANEL ─────────────────────────────────────────── */
+  .doc-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+  .doc-panel::-webkit-scrollbar { width: 4px; }
+  .doc-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .cmd-hero {
+    margin-bottom: 28px;
+  }
+  .cmd-hero-top {
+    display: flex; align-items: flex-start; gap: 16px; margin-bottom: 12px;
+  }
+  .cmd-big-name {
+    font-family: var(--mono);
+    font-size: 36px; font-weight: 700;
+    color: var(--green);
+    letter-spacing: -1px;
+  }
+  .cmd-level-pill {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-top: 10px;
+  }
+  .cmd-full-name {
+    font-size: 14px; color: var(--text2);
+    font-family: var(--mono);
+    margin-bottom: 8px;
+  }
+  .cmd-description {
+    font-size: 15px; color: var(--text1);
+    line-height: 1.7; max-width: 680px;
+  }
+
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text3); font-family: var(--mono);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--border);
+  }
+
+  /* Syntax block */
+  .syntax-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--cyan);
+    letter-spacing: 0.3px;
+    overflow-x: auto;
+  }
+  .syn-cmd { color: var(--green); font-weight: 600; }
+  .syn-opt { color: var(--yellow); }
+  .syn-arg { color: var(--text1); }
+  .syn-meta { color: var(--text3); }
+
+  /* Flags table */
+  .flags-table { width: 100%; border-collapse: collapse; }
+  .flags-table th {
+    text-align: left; padding: 8px 12px;
+    font-size: 11px; font-weight: 600;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px;
+    font-family: var(--mono);
+    border-bottom: 1px solid var(--border);
+  }
+  .flags-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px; vertical-align: top;
+  }
+  .flags-table tr:hover td { background: var(--bg2); }
+  .flag-code {
+    font-family: var(--mono); font-weight: 600;
+    color: var(--yellow); white-space: nowrap;
+  }
+  .flag-desc { color: var(--text1); }
+  .flag-example { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  /* Examples */
+  .example-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .example-header {
+    padding: 8px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .example-header .dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #f85149; } .dot-y { background: #f0883e; } .dot-g { background: #3fb950; }
+  .example-label {
+    font-size: 11px; color: var(--text2); font-family: var(--mono);
+    margin-left: 4px;
+  }
+  .example-body { padding: 14px; }
+  .example-cmd {
+    font-family: var(--mono); font-size: 13px;
+    color: var(--green); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .example-cmd::before { content: '$'; color: var(--text3); }
+  .example-out {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--text2); line-height: 1.6;
+    background: var(--bg1); padding: 10px 12px;
+    border-radius: 5px; margin-top: 8px;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .example-note {
+    font-size: 12px; color: var(--text3);
+    margin-top: 8px; line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* Flow diagram */
+  .flow-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px;
+  }
+  .flow-step {
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 6px; padding: 8px 20px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--text1); text-align: center; width: 100%; max-width: 400px;
+  }
+  .flow-step.hl { border-color: var(--green3); color: var(--green); }
+  .flow-arrow { color: var(--text3); font-size: 16px; }
+
+  /* ─── TERMINAL PANEL ─────────────────────────────────────────── */
+  .terminal-panel {
+    width: 380px;
+    min-width: 380px;
+    border-left: 1px solid var(--border);
+    background: var(--bg1);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .terminal-header {
+    padding: 10px 14px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .terminal-header .dots { display: flex; gap: 5px; }
+  .terminal-title {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--text2); margin-left: 4px;
+  }
+  .terminal-tab {
+    margin-left: auto;
+    background: var(--greenDim);
+    color: var(--green);
+    font-size: 10px; font-family: var(--mono);
+    padding: 3px 8px; border-radius: 3px;
+    font-weight: 600;
+  }
+  .terminal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  .terminal-body::-webkit-scrollbar { width: 3px; }
+  .terminal-body::-webkit-scrollbar-thumb { background: var(--border2); }
+  .t-line { color: var(--text2); }
+  .t-prompt { color: var(--green); }
+  .t-cmd { color: var(--text0); }
+  .t-out { color: var(--text2); }
+  .t-err { color: var(--red); }
+  .t-info { color: var(--cyan); }
+  .t-success { color: var(--green); }
+  .t-dir { color: var(--cyan); font-weight: 600; }
+  .t-file { color: var(--text0); }
+  .t-exec { color: var(--green); font-weight: 600; }
+  .t-link { color: var(--cyan2); }
+  .terminal-input-row {
+    border-top: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .terminal-prompt {
+    font-family: var(--mono); font-size: 12.5px;
+    color: var(--green); white-space: nowrap;
+  }
+  .terminal-input {
+    flex: 1;
+    background: transparent;
+    border: none; outline: none;
+    color: var(--text0);
+    font-family: var(--mono); font-size: 12.5px;
+    caret-color: var(--green);
+  }
+  .terminal-run-btn {
+    background: var(--greenDim);
+    border: 1px solid var(--green3);
+    color: var(--green);
+    font-family: var(--mono); font-size: 11px;
+    padding: 4px 10px; border-radius: 4px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .terminal-run-btn:hover { background: var(--green3); color: #fff; }
+
+  .terminal-quick-btns {
+    padding: 8px 14px 4px;
+    display: flex; gap: 4px; flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  .qbtn {
+    font-family: var(--mono); font-size: 11px;
+    padding: 4px 8px;
+    background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text2); border-radius: 4px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .qbtn:hover { border-color: var(--green2); color: var(--green); background: var(--bg3); }
+
+  /* ─── WELCOME SCREEN ─────────────────────────────────────────── */
+  .welcome-screen {
+    padding: 40px 32px;
+    display: flex; flex-direction: column;
+    align-items: flex-start;
+  }
+  .welcome-badge {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--greenDim); color: var(--green);
+    padding: 4px 10px; border-radius: 4px;
+    margin-bottom: 16px; display: inline-block;
+    border: 1px solid var(--green3);
+  }
+  .welcome-title {
+    font-size: 32px; font-weight: 700;
+    color: var(--text0); margin-bottom: 10px;
+    line-height: 1.2; letter-spacing: -0.5px;
+  }
+  .welcome-title span { color: var(--green); }
+  .welcome-sub {
+    font-size: 15px; color: var(--text2);
+    line-height: 1.6; max-width: 580px; margin-bottom: 28px;
+  }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; width: 100%; max-width: 540px; margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+  }
+  .stat-num { font-size: 26px; font-weight: 700; font-family: var(--mono); color: var(--text0); }
+  .stat-label { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .path-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; width: 100%; max-width: 600px;
+  }
+  .path-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .path-card:hover { border-color: var(--border2); background: var(--bg3); transform: translateY(-1px); }
+  .path-card-icon { font-size: 20px; margin-bottom: 8px; }
+  .path-card-title { font-size: 14px; font-weight: 600; color: var(--text0); margin-bottom: 4px; }
+  .path-card-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  /* ─── RESPONSIVE SCROLLBAR ─────────────────────────────────────────── */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Tip box */
+  .tip-box {
+    background: #0d1f2d;
+    border: 1px solid #1a3a52;
+    border-left: 3px solid var(--cyan);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px; color: var(--text1);
+    line-height: 1.6; margin: 12px 0;
+  }
+  .tip-box strong { color: var(--cyan); }
+
+  .warn-box {
+    background: #1f1a0d;
+    border: 1px solid #3a2a1a;
+    border-left: 3px solid var(--orange);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px; color: var(--text1);
+    line-height: 1.6; margin: 12px 0;
+  }
+  .warn-box strong { color: var(--orange); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ─── SIDEBAR ─────────────────────────────────────────── -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">$_</div>
+        <div>
+          <div class="logo-text">LinuxHub</div>
+          <div class="logo-sub">master the terminal</div>
+        </div>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Search commands..." oninput="filterCommands(this.value)">
+      </div>
+    </div>
+
+    <div class="level-tabs">
+      <button class="level-tab active-beg" onclick="filterLevel('all', this)">All</button>
+      <button class="level-tab" onclick="filterLevel('beginner', this)">Beginner</button>
+      <button class="level-tab" onclick="filterLevel('intermediate', this)">Inter.</button>
+      <button class="level-tab" onclick="filterLevel('advanced', this)">Advanced</button>
+    </div>
+
+    <div class="cmd-list-header">Commands</div>
+    <div class="cmd-list" id="cmdList"></div>
+  </div>
+
+  <!-- ─── MAIN ─────────────────────────────────────────── -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-breadcrumb" id="breadcrumb">
+        <span style="color:var(--text3)">~</span>
+        <span style="color:var(--text3)">/</span>
+        <span>LinuxHub</span>
+      </div>
+      <div class="topbar-stats">
+        <div class="stat-chip"><div class="stat-dot" style="background:var(--green)"></div><span id="stat-cmds">60 commands</span></div>
+        <div class="stat-chip"><div class="stat-dot" style="background:var(--purple)"></div><span>Live terminal</span></div>
+        <div class="stat-chip"><div class="stat-dot" style="background:var(--cyan)"></div><span>3 levels</span></div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="doc-panel" id="docPanel">
+        <!-- Welcome screen loaded here -->
+      </div>
+
+      <!-- ─── TERMINAL ─────────────────────────────────────────── -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="dots">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <span class="terminal-title">bash — user@linuxhub</span>
+          <div class="terminal-tab">LIVE</div>
+        </div>
+        <div class="terminal-quick-btns" id="quickBtns"></div>
+        <div class="terminal-body" id="terminalBody"></div>
+        <div class="terminal-input-row">
+          <span class="terminal-prompt">user@linuxhub:~$</span>
+          <input class="terminal-input" id="termInput" placeholder="type a command..." autocomplete="off" autocorrect="off" spellcheck="false">
+          <button class="terminal-run-btn" onclick="runTermCmd()">↵ Run</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  COMMAND DATABASE
+// ─────────────────────────────────────────────────────────────
+const commands = [
+  // ── NAVIGATION ──────────────────────────────────────────
+  {
+    id:'pwd', name:'pwd', full:'Print Working Directory', level:'beginner',
+    category:'Navigation', shortDesc:'Show current directory',
+    description:'Displays the absolute path of the current working directory. Essential for knowing "where you are" in the filesystem tree at any point.',
+    syntax:`<span class="syn-cmd">pwd</span> <span class="syn-opt">[-L|-P]</span>`,
+    flags:[
+      {flag:'-L', desc:'Follow symbolic links (default)', ex:'pwd -L'},
+      {flag:'-P', desc:'Show the physical path, resolving all symlinks', ex:'pwd -P'},
+    ],
+    examples:[
+      {label:'Basic usage', cmd:'pwd', out:'/home/alice', note:'Shows your current directory location'},
+      {label:'Physical path', cmd:'pwd -P', out:'/home/alice/realdir', note:'Resolves symlinks to show true path'},
+    ],
+    flow:['Shell invoked','OS reads cwd from process table','Returns absolute path string'],
+    tip:'Use pwd when writing scripts to capture the script\'s launch directory: DIR=$(pwd)',
+  },
+  {
+    id:'ls', name:'ls', full:'List Directory Contents', level:'beginner',
+    category:'Navigation', shortDesc:'List files and directories',
+    description:'Lists files and directories in the specified location. One of the most frequently used commands — you\'ll use this dozens of times per session.',
+    syntax:`<span class="syn-cmd">ls</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[path]</span>`,
+    flags:[
+      {flag:'-l', desc:'Long format: permissions, owner, size, date', ex:'ls -l'},
+      {flag:'-a', desc:'Show all files including hidden (dot files)', ex:'ls -a'},
+      {flag:'-h', desc:'Human-readable sizes (KB, MB, GB)', ex:'ls -lh'},
+      {flag:'-R', desc:'Recursive — list all subdirectories', ex:'ls -R'},
+      {flag:'-t', desc:'Sort by modification time (newest first)', ex:'ls -lt'},
+      {flag:'-S', desc:'Sort by file size (largest first)', ex:'ls -lS'},
+      {flag:'--color', desc:'Colorize output by file type', ex:'ls --color=auto'},
+    ],
+    examples:[
+      {label:'List current directory', cmd:'ls', out:`Desktop  Documents  Downloads  Music  Pictures  Videos`, note:'Default short listing'},
+      {label:'Detailed listing', cmd:'ls -lah', out:`total 48K\ndrwxr-xr-x  8 alice users 4.0K Mar 15 10:22 .\ndrwxr-xr-x 12 root  root  4.0K Mar 14 09:15 ..\n-rw-r--r--  1 alice users  220 Mar 14 09:15 .bash_logout\ndrwxr-xr-x  2 alice users 4.0K Mar 15 10:22 Desktop`, note:'Shows permissions, owner, size, modification time'},
+      {label:'List specific folder', cmd:'ls -l /etc/', out:`total 1120\n-rw-r--r-- 1 root root  2981 Feb  3 2023 adduser.conf\ndrwxr-xr-x 2 root root  4096 Mar 14 09:15 alternatives`, note:'Can list any directory'},
+    ],
+    flow:['ls reads directory entry','Calls stat() for each file','Sorts by name (default)','Formats and outputs'],
+    tip:'Alias ll=\'ls -lah\' in your .bashrc for a power listing shortcut you\'ll use constantly.',
+    warn:'Avoid ls -R on / (root) — it will try to list the entire filesystem!',
+  },
+  {
+    id:'cd', name:'cd', full:'Change Directory', level:'beginner',
+    category:'Navigation', shortDesc:'Move between directories',
+    description:'Changes your current working directory. It\'s a shell built-in (not an external binary) and is fundamental to navigating Linux. Mastering shortcuts like ~, -, and .. will save you enormous time.',
+    syntax:`<span class="syn-cmd">cd</span> <span class="syn-arg">[directory]</span>`,
+    flags:[
+      {flag:'~', desc:'Jump to your home directory from anywhere', ex:'cd ~'},
+      {flag:'-', desc:'Go back to previous directory (like browser back)', ex:'cd -'},
+      {flag:'..', desc:'Go up one level to parent directory', ex:'cd ..'},
+      {flag:'../..', desc:'Go up two levels', ex:'cd ../..'},
+    ],
+    examples:[
+      {label:'Go to home directory', cmd:'cd ~', out:`# Now in /home/alice`, note:'~ always expands to your home'},
+      {label:'Navigate to a path', cmd:'cd /var/log', out:`# Now in /var/log`, note:'Absolute path navigation'},
+      {label:'Go back', cmd:'cd -', out:`/home/alice\n# Back to previous directory`, note:'Super useful when bouncing between dirs'},
+    ],
+    flow:['cd receives path argument','Shell resolves absolute/relative path','Changes process cwd','Updates $PWD variable'],
+    tip:'Use "cd -" constantly — it\'s like Ctrl+Z for navigation. Also: "pushd/popd" for a navigation stack.',
+  },
+  {
+    id:'tree', name:'tree', full:'Tree Directory Listing', level:'beginner',
+    category:'Navigation', shortDesc:'Visual directory tree',
+    description:'Displays directory contents in a visually pleasing tree format. Must be installed separately on most systems (apt install tree). Great for quickly understanding project structure.',
+    syntax:`<span class="syn-cmd">tree</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[path]</span>`,
+    flags:[
+      {flag:'-L n', desc:'Limit depth to n levels', ex:'tree -L 2'},
+      {flag:'-a', desc:'Show hidden files', ex:'tree -a'},
+      {flag:'-d', desc:'Show directories only', ex:'tree -d'},
+      {flag:'-h', desc:'Human readable sizes', ex:'tree -h'},
+      {flag:'-I pat', desc:'Ignore files matching pattern', ex:"tree -I 'node_modules'"},
+    ],
+    examples:[
+      {label:'Tree current dir', cmd:'tree', out:`.\n├── docs\n│   ├── README.md\n│   └── API.md\n├── src\n│   ├── main.py\n│   └── utils.py\n└── tests\n    └── test_main.py\n\n3 directories, 5 files`, note:'Visual hierarchy at a glance'},
+      {label:'Two levels deep', cmd:'tree -L 2 /var', out:`/var\n├── backups\n├── cache\n│   ├── apt\n│   └── man\n├── lib\n└── log`, note:''},
+    ],
+    flow:['Reads directory recursively','Builds tree structure in memory','Renders with box-drawing characters'],
+    tip:'In projects: tree -L 2 -I node_modules --gitignore gives a clean project overview.',
+  },
+
+  // ── FILE OPS ──────────────────────────────────────────
+  {
+    id:'cp', name:'cp', full:'Copy', level:'beginner',
+    category:'File Operations', shortDesc:'Copy files and directories',
+    description:'Copies files or directories from one location to another. Supports recursive copying, preserving attributes, and interactive mode to avoid accidents.',
+    syntax:`<span class="syn-cmd">cp</span> <span class="syn-opt">[options]</span> <span class="syn-arg">source dest</span>`,
+    flags:[
+      {flag:'-r / -R', desc:'Recursive — copy entire directory trees', ex:'cp -r dir1/ dir2/'},
+      {flag:'-i', desc:'Interactive: ask before overwriting', ex:'cp -i file1 file2'},
+      {flag:'-p', desc:'Preserve permissions, timestamps, owner', ex:'cp -p config.conf backup/'},
+      {flag:'-v', desc:'Verbose: show what is being copied', ex:'cp -v *.txt backup/'},
+      {flag:'-u', desc:'Copy only if source is newer than dest', ex:'cp -u *.log archive/'},
+      {flag:'-n', desc:'No-clobber: never overwrite existing files', ex:'cp -n src.txt dest.txt'},
+    ],
+    examples:[
+      {label:'Copy a file', cmd:'cp report.pdf backup/report.pdf', out:`# File copied`, note:'Simple file copy'},
+      {label:'Copy directory', cmd:'cp -r project/ project-backup/', out:`# Entire directory tree copied`, note:'-r is required for directories'},
+      {label:'Copy with verbose', cmd:'cp -rv src/ dst/', out:`'src/main.py' -> 'dst/main.py'\n'src/utils.py' -> 'dst/utils.py'\n'src/data/db.json' -> 'dst/data/db.json'`, note:'See every file as it copies'},
+    ],
+    flow:['cp opens source file','Creates destination file','Copies data block by block','Optionally copies metadata'],
+    tip:'cp -a (archive mode) = -dpR. It\'s the safest for full directory backups as it preserves everything.',
+    warn:'cp will silently overwrite destination files by default — use -i or -n to be safe!',
+  },
+  {
+    id:'mv', name:'mv', full:'Move', level:'beginner',
+    category:'File Operations', shortDesc:'Move or rename files',
+    description:'Moves files/directories between locations or renames them. Unlike cp, the original is removed. On the same filesystem, this is instant (just updates directory entry); across filesystems it copies then deletes.',
+    syntax:`<span class="syn-cmd">mv</span> <span class="syn-opt">[options]</span> <span class="syn-arg">source dest</span>`,
+    flags:[
+      {flag:'-i', desc:'Interactive: confirm before overwriting', ex:'mv -i old.txt new.txt'},
+      {flag:'-v', desc:'Verbose output', ex:'mv -v *.log archive/'},
+      {flag:'-n', desc:'No-clobber: do not overwrite', ex:'mv -n a.txt b.txt'},
+      {flag:'-u', desc:'Move only if source is newer', ex:'mv -u file1 file2'},
+    ],
+    examples:[
+      {label:'Rename a file', cmd:'mv oldname.txt newname.txt', out:`# File renamed`, note:'mv is how you rename files in Linux'},
+      {label:'Move to directory', cmd:'mv report.pdf ~/Documents/', out:`# Moved to Documents`, note:''},
+      {label:'Move multiple files', cmd:'mv *.txt archive/', out:`# All .txt files moved`, note:'Glob patterns work great here'},
+    ],
+    flow:['mv checks source exists','On same fs: rename() syscall (instant)','Cross fs: copy + delete','Updates directory entries'],
+    tip:'Use mv with brace expansion for quick renaming: mv config{.bak,}  renames config.bak → config',
+  },
+  {
+    id:'rm', name:'rm', full:'Remove', level:'beginner',
+    category:'File Operations', shortDesc:'Delete files and directories',
+    description:'Permanently removes files or directories. Unlike the GUI trash bin, there is NO undo — files are gone. This makes rm one of the most dangerous yet essential commands.',
+    syntax:`<span class="syn-cmd">rm</span> <span class="syn-opt">[options]</span> <span class="syn-arg">file(s)</span>`,
+    flags:[
+      {flag:'-r / -R', desc:'Recursive — remove directory and all contents', ex:'rm -r olddir/'},
+      {flag:'-f', desc:'Force: no prompts, ignore missing files', ex:'rm -f lockfile'},
+      {flag:'-i', desc:'Interactive: ask before each deletion', ex:'rm -i *.log'},
+      {flag:'-v', desc:'Verbose: show what is deleted', ex:'rm -rv tempdir/'},
+    ],
+    examples:[
+      {label:'Remove a file', cmd:'rm unwanted.txt', out:`# File permanently deleted`, note:'Gone forever — no trash!'},
+      {label:'Remove directory', cmd:'rm -rf old-project/', out:`# Entire directory deleted`, note:'Use with extreme caution'},
+      {label:'Interactive delete', cmd:'rm -i *.tmp', out:`rm: remove 'cache.tmp'? y\nrm: remove 'lock.tmp'? n`, note:'Safe way to bulk delete'},
+    ],
+    flow:['rm calls unlink() for each file','Kernel decrements hard link count','When count=0, disk blocks freed','Directory entry removed'],
+    warn:'⚠️  NEVER run: rm -rf /  or  rm -rf ~  or  rm -rf .  without being 100% sure what . points to!',
+    tip:'Add alias rm=\'rm -i\' in .bashrc to always get a confirmation prompt. Use trash-cli for a recoverable delete.',
+  },
+  {
+    id:'mkdir', name:'mkdir', full:'Make Directory', level:'beginner',
+    category:'File Operations', shortDesc:'Create directories',
+    description:'Creates one or more directories. With -p it creates the entire path tree at once, which is incredibly useful for setting up project structures.',
+    syntax:`<span class="syn-cmd">mkdir</span> <span class="syn-opt">[options]</span> <span class="syn-arg">dir(s)</span>`,
+    flags:[
+      {flag:'-p', desc:'Create parent directories as needed', ex:'mkdir -p a/b/c/d'},
+      {flag:'-v', desc:'Print message for each created directory', ex:'mkdir -pv project/src'},
+      {flag:'-m', desc:'Set permissions (mode) on creation', ex:'mkdir -m 755 public'},
+    ],
+    examples:[
+      {label:'Create directory', cmd:'mkdir projects', out:`# Directory created`, note:'Simple creation'},
+      {label:'Create nested path', cmd:'mkdir -p ~/code/python/web/app', out:`# Entire path created`, note:'-p creates every missing directory in the path'},
+      {label:'Create multiple', cmd:'mkdir src tests docs', out:`# Three directories created`, note:'Space-separate for multiple'},
+    ],
+    flow:['mkdir calls mkdir() syscall','Creates inode in filesystem','Links to parent directory','Sets ownership and permissions'],
+    tip:'mkdir -p is your best friend for project scaffolding! Combine with && to create and enter: mkdir -p newdir && cd newdir',
+  },
+  {
+    id:'touch', name:'touch', full:'Touch', level:'beginner',
+    category:'File Operations', shortDesc:'Create empty files or update timestamps',
+    description:'Creates empty files or updates access/modification timestamps of existing files. Commonly used to create placeholder files or trigger timestamp-based build systems.',
+    syntax:`<span class="syn-cmd">touch</span> <span class="syn-opt">[options]</span> <span class="syn-arg">file(s)</span>`,
+    flags:[
+      {flag:'-a', desc:'Change access time only', ex:'touch -a file.txt'},
+      {flag:'-m', desc:'Change modification time only', ex:'touch -m file.txt'},
+      {flag:'-t', desc:'Use specific timestamp: [[CC]YY]MMDDhhmm[.ss]', ex:"touch -t 202401010000 file"},
+      {flag:'-r', desc:'Use another file\'s timestamp', ex:'touch -r ref.txt new.txt'},
+    ],
+    examples:[
+      {label:'Create empty file', cmd:'touch README.md', out:`# Empty file created`, note:'Creates file if not exists; updates timestamp if exists'},
+      {label:'Create multiple', cmd:'touch index.html style.css app.js', out:`# Three files created`, note:''},
+      {label:'Set specific time', cmd:'touch -t 202403150900 report.pdf', out:`# Timestamp set to 2024-03-15 09:00`, note:''},
+    ],
+    flow:['touch calls open() with O_CREAT','If file exists: calls utime() to update','Sets atime/mtime as requested'],
+    tip:'touch is great for quick file creation in scripts: touch .gitkeep to preserve empty directories in git',
+  },
+  {
+    id:'ln', name:'ln', full:'Link', level:'intermediate',
+    category:'File Operations', shortDesc:'Create hard and symbolic links',
+    description:'Creates hard links (multiple names for same inode) or symbolic links (pointers/shortcuts to another path). Understanding the difference is key to advanced Linux usage.',
+    syntax:`<span class="syn-cmd">ln</span> <span class="syn-opt">[options]</span> <span class="syn-arg">target link_name</span>`,
+    flags:[
+      {flag:'-s', desc:'Create symbolic (soft) link', ex:'ln -s /etc/nginx nginx_conf'},
+      {flag:'-f', desc:'Force: remove existing link/file', ex:'ln -sf new.py current.py'},
+      {flag:'-v', desc:'Verbose output', ex:'ln -sv target link'},
+      {flag:'-r', desc:'Create symlink relative to link location', ex:'ln -sr src/file link'},
+    ],
+    examples:[
+      {label:'Symlink to binary', cmd:'ln -s /usr/bin/python3 ~/bin/python', out:`# ~/bin/python -> /usr/bin/python3`, note:'Classic use: version management'},
+      {label:'Hard link', cmd:'ln original.txt hardlink.txt', out:`# Both names point to same inode`, note:'Hard links share data — deleting one keeps the other'},
+      {label:'Force update symlink', cmd:'ln -sf /usr/bin/python3.11 /usr/local/bin/python3', out:`# Symlink updated`, note:'Use -f to update existing symlink'},
+    ],
+    flow:['Symlink: creates new inode pointing to path string','Hard link: adds new directory entry to existing inode','No data is copied in either case'],
+    tip:'Use "ls -la" to see symlink targets (shown as: link -> target). Broken symlinks point to non-existent targets.',
+  },
+
+  // ── TEXT PROCESSING ──────────────────────────────────────────
+  {
+    id:'cat', name:'cat', full:'Concatenate', level:'beginner',
+    category:'Text Processing', shortDesc:'View and concatenate files',
+    description:'Reads file(s) and writes them to standard output. Use it to quickly view small files, concatenate multiple files, or pass file contents to another command. For large files, use less instead.',
+    syntax:`<span class="syn-cmd">cat</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[file(s)]</span>`,
+    flags:[
+      {flag:'-n', desc:'Number all output lines', ex:'cat -n file.txt'},
+      {flag:'-A', desc:'Show all: display tabs as ^I and newlines as $', ex:'cat -A file.txt'},
+      {flag:'-s', desc:'Squeeze multiple blank lines into one', ex:'cat -s file.txt'},
+      {flag:'-E', desc:'Show $ at end of each line', ex:'cat -E file.txt'},
+    ],
+    examples:[
+      {label:'View file', cmd:'cat /etc/hostname', out:`linuxhub`, note:'Simple file content display'},
+      {label:'View with line numbers', cmd:'cat -n script.sh', out:`     1\t#!/bin/bash\n     2\techo "Hello"\n     3\texit 0`, note:'Numbers help when debugging'},
+      {label:'Concatenate files', cmd:'cat header.txt body.txt footer.txt > full.txt', out:`# Three files merged into one`, note:'Create combined output'},
+    ],
+    flow:['cat opens each file in order','Reads and writes to stdout','Shell handles > redirection'],
+    tip:'cat file | wc -l counts lines. But for large files use less or tail -f for live monitoring.',
+  },
+  {
+    id:'grep', name:'grep', full:'Global Regular Expression Print', level:'beginner',
+    category:'Text Processing', shortDesc:'Search text with patterns',
+    description:'Searches for lines matching a pattern (plain text or regex) in files or piped input. One of the most powerful and frequently used commands — essential for logs, configs, and code.',
+    syntax:`<span class="syn-cmd">grep</span> <span class="syn-opt">[options]</span> <span class="syn-arg">pattern [file(s)]</span>`,
+    flags:[
+      {flag:'-i', desc:'Case-insensitive matching', ex:"grep -i 'error' app.log"},
+      {flag:'-r / -R', desc:'Recursive search in directories', ex:"grep -r 'TODO' ./src"},
+      {flag:'-n', desc:'Show line numbers', ex:"grep -n 'main' script.py"},
+      {flag:'-v', desc:'Invert match — show non-matching lines', ex:"grep -v '^#' config.txt"},
+      {flag:'-l', desc:'List filenames with matches only', ex:"grep -rl 'import' ."},
+      {flag:'-c', desc:'Count matching lines per file', ex:"grep -c 'ERROR' *.log"},
+      {flag:'-E', desc:'Extended regex (same as egrep)', ex:"grep -E '^[0-9]+' data.txt"},
+      {flag:'-A n', desc:'Show n lines after each match', ex:"grep -A 3 'Exception' log"},
+      {flag:'-B n', desc:'Show n lines before each match', ex:"grep -B 2 'ERROR' log"},
+    ],
+    examples:[
+      {label:'Find word in file', cmd:"grep 'error' /var/log/syslog", out:`Mar 15 10:22:31 host kernel: [  0.412] error: device not found\nMar 15 11:45:12 host app: error connecting to database`, note:'Shows every matching line'},
+      {label:'Case-insensitive recursive', cmd:"grep -rin 'password' ./config/", out:`config/db.conf:12:db_password=secret123\nconfig/app.yaml:5:# Password config section`, note:'Search all config files'},
+      {label:'Count errors in logs', cmd:'grep -c "ERROR" *.log', out:`app.log:142\naccess.log:3\nerror.log:892`, note:'Quick log health check'},
+    ],
+    flow:['grep reads each line','Tests against compiled regex','Prints matching lines to stdout','Applies context lines if -A/-B/-C used'],
+    tip:'grep -P enables Perl-compatible regex for lookaheads, lookbehinds. Combine with pipes: ps aux | grep nginx',
+  },
+  {
+    id:'sed', name:'sed', full:'Stream Editor', level:'intermediate',
+    category:'Text Processing', shortDesc:'Transform text streams',
+    description:'A non-interactive stream editor that processes text line by line. Best known for search-and-replace but also supports deletion, insertion, and complex transformations.',
+    syntax:`<span class="syn-cmd">sed</span> <span class="syn-opt">[options]</span> <span class="syn-arg">\'script\' [file]</span>`,
+    flags:[
+      {flag:'-i', desc:'Edit file in-place (modify original)', ex:"sed -i 's/foo/bar/' file"},
+      {flag:'-n', desc:'Suppress automatic printing', ex:"sed -n '5p' file"},
+      {flag:'-e', desc:'Multiple expressions', ex:"sed -e 's/a/b/' -e 's/c/d/' file"},
+      {flag:'-r / -E', desc:'Extended regular expressions', ex:"sed -r 's/[0-9]+/NUM/g' file"},
+    ],
+    examples:[
+      {label:'Replace text', cmd:"sed 's/localhost/production.server.com/g' config.template > config.conf", out:`# All occurrences replaced`, note:'g flag = global replace (all occurrences)'},
+      {label:'Delete blank lines', cmd:"sed '/^$/d' file.txt", out:`# Blank lines removed`, note:'^$ matches empty lines; d deletes them'},
+      {label:'Print specific line', cmd:"sed -n '10,20p' large_file.txt", out:`[lines 10 to 20 only]`, note:'Efficient way to peek at line ranges'},
+    ],
+    flow:['sed reads line into pattern space','Applies script operations','Prints pattern space (unless -n)','Processes next line'],
+    tip:"sed -i.bak 's/old/new/g' file modifies in-place AND saves backup as file.bak — always do this for safety!",
+  },
+  {
+    id:'awk', name:'awk', full:'Aho-Weinberger-Kernighan', level:'intermediate',
+    category:'Text Processing', shortDesc:'Text processing & data extraction',
+    description:'A full programming language for text processing. Excels at extracting specific columns from structured output, doing math on data, and generating reports from log files.',
+    syntax:`<span class="syn-cmd">awk</span> <span class="syn-opt">[options]</span> <span class="syn-arg">\'pattern {action}\' [file]</span>`,
+    flags:[
+      {flag:'-F', desc:'Set field separator', ex:"awk -F: '{print $1}' /etc/passwd"},
+      {flag:'-v', desc:'Set variable', ex:"awk -v OFS=',' '{print $1,$2}' file"},
+      {flag:'-f', desc:'Read awk program from file', ex:'awk -f prog.awk data.txt'},
+    ],
+    examples:[
+      {label:'Print specific column', cmd:"ps aux | awk '{print $1, $11}'", out:`USER COMMAND\nalice /usr/bin/bash\nalice /usr/bin/python3`, note:'$1=first field, $2=second, etc. $0=whole line'},
+      {label:'Sum a column', cmd:"awk '{sum += $3} END {print \"Total:\", sum}' sales.csv", out:`Total: 154830`, note:'Built-in END block runs after all lines processed'},
+      {label:'Custom separator', cmd:"awk -F: '{print $1, $6}' /etc/passwd", out:`root /root\nalice /home/alice\nbob /home/bob`, note:'User and home directory from passwd'},
+    ],
+    flow:['awk splits each line into fields ($1,$2…)','Tests pattern condition','Runs action block if matched','Built-in BEGIN/END for setup/teardown'],
+    tip:'awk NR==5 prints line 5. awk NF prints lines with at least 1 field. Master awk for serious sysadmin work!',
+  },
+  {
+    id:'wc', name:'wc', full:'Word Count', level:'beginner',
+    category:'Text Processing', shortDesc:'Count lines, words, bytes',
+    description:'Counts lines, words, and bytes/characters in files. Simple but extremely useful in pipelines for quick statistics on file content.',
+    syntax:`<span class="syn-cmd">wc</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[file(s)]</span>`,
+    flags:[
+      {flag:'-l', desc:'Count lines only', ex:'wc -l file.txt'},
+      {flag:'-w', desc:'Count words only', ex:'wc -w essay.txt'},
+      {flag:'-c', desc:'Count bytes', ex:'wc -c binary.bin'},
+      {flag:'-m', desc:'Count characters (handles multibyte)', ex:'wc -m unicode.txt'},
+    ],
+    examples:[
+      {label:'Count lines in log', cmd:'wc -l /var/log/syslog', out:`4821 /var/log/syslog`, note:''},
+      {label:'Count processes', cmd:'ps aux | wc -l', out:`127`, note:'Piped input — no filename in output'},
+      {label:'Multiple files', cmd:'wc -l *.py', out:`   42 main.py\n  128 utils.py\n   15 config.py\n  185 total`, note:'Gives subtotals and grand total'},
+    ],
+    flow:['wc reads file char by char','Increments byte/char/word/line counters','Prints counts with filename'],
+    tip:"grep -c '' file is often faster for line counts on very large files, as it doesn't count other things.",
+  },
+  {
+    id:'sort', name:'sort', full:'Sort', level:'beginner',
+    category:'Text Processing', shortDesc:'Sort lines of text',
+    description:'Sorts lines of text from files or stdin. Supports alphabetic, numeric, reverse, unique, and field-based sorting. Essential for processing data and logs.',
+    syntax:`<span class="syn-cmd">sort</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[file(s)]</span>`,
+    flags:[
+      {flag:'-n', desc:'Numeric sort (2 before 10)', ex:'sort -n numbers.txt'},
+      {flag:'-r', desc:'Reverse order', ex:'sort -r file.txt'},
+      {flag:'-u', desc:'Unique: remove duplicate lines', ex:'sort -u ips.txt'},
+      {flag:'-k n', desc:'Sort by field n', ex:'sort -k2 -n data.txt'},
+      {flag:'-t', desc:'Field delimiter', ex:"sort -t: -k3 -n /etc/passwd"},
+      {flag:'-h', desc:'Human-readable sort (1K, 2M, 3G)', ex:'du -h | sort -h'},
+    ],
+    examples:[
+      {label:'Sort alphabetically', cmd:'sort names.txt', out:`Alice\nBob\nCharlie\nDave`, note:'Default alphabetic sort'},
+      {label:'Top 5 biggest files', cmd:'du -sh * | sort -rh | head -5', out:`2.1G  videos\n854M  Downloads\n421M  projects\n120M  Music\n48M   Documents`, note:'Human-size sort + reverse = biggest first'},
+      {label:'Unique IPs from log', cmd:"awk '{print $1}' access.log | sort -u", out:`10.0.0.1\n10.0.0.15\n192.168.1.100`, note:'Extract unique visitors'},
+    ],
+    flow:['sort reads all input into memory','Applies comparison function','Optionally deduplicates (-u)','Writes sorted output'],
+    tip:'sort | uniq -c | sort -rn gives you frequency counts — classic pattern for log analysis!',
+  },
+  {
+    id:'uniq', name:'uniq', full:'Unique', level:'beginner',
+    category:'Text Processing', shortDesc:'Filter duplicate lines',
+    description:'Filters or reports duplicate adjacent lines. Almost always used after sort since it only compares consecutive lines. A core component of text analysis pipelines.',
+    syntax:`<span class="syn-cmd">uniq</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[input [output]]</span>`,
+    flags:[
+      {flag:'-c', desc:'Prefix count of each line', ex:'sort file | uniq -c'},
+      {flag:'-d', desc:'Print only duplicate lines', ex:'sort file | uniq -d'},
+      {flag:'-u', desc:'Print only unique lines (not duplicated)', ex:'sort file | uniq -u'},
+      {flag:'-i', desc:'Case-insensitive comparison', ex:'sort file | uniq -i'},
+    ],
+    examples:[
+      {label:'Count word frequency', cmd:"cat essay.txt | tr -s ' ' '\\n' | sort | uniq -c | sort -rn | head -10", out:`     42 the\n     28 of\n     19 and\n     15 Linux\n     12 command`, note:'Classic word frequency pipeline'},
+      {label:'Find duplicate IPs', cmd:'sort access.log | uniq -d', out:`192.168.1.50\n10.0.0.1`, note:'IPs that appear more than once'},
+    ],
+    flow:['uniq compares each line with previous','Outputs based on flag (all/dup/unique)','With -c: prepends occurrence count'],
+    tip:'sort | uniq -c | sort -rn is the most powerful text analysis pipeline — memorize it!',
+  },
+  {
+    id:'cut', name:'cut', full:'Cut', level:'intermediate',
+    category:'Text Processing', shortDesc:'Extract columns from text',
+    description:'Extracts sections from each line of input — by character position, byte position, or field delimiter. A quick way to pick columns from structured text without awk.',
+    syntax:`<span class="syn-cmd">cut</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[file]</span>`,
+    flags:[
+      {flag:'-d', desc:'Delimiter character', ex:"cut -d: -f1 /etc/passwd"},
+      {flag:'-f', desc:'Field number(s) to extract', ex:"cut -d, -f2,4 data.csv"},
+      {flag:'-c', desc:'Character positions', ex:'cut -c1-10 file.txt'},
+      {flag:'-b', desc:'Byte positions', ex:'cut -b1-4 binary.txt'},
+    ],
+    examples:[
+      {label:'Extract usernames', cmd:"cut -d: -f1 /etc/passwd", out:`root\ndaemon\nbin\nsys\nalice`, note:'Field 1 of colon-separated /etc/passwd'},
+      {label:'Get CSV columns', cmd:"cut -d',' -f2,4 data.csv", out:`Name,Score\nAlice,95\nBob,87\nCharlie,91`, note:'Pick specific columns from CSV'},
+    ],
+    flow:['cut reads line by line','Splits on delimiter (or positions)','Selects specified field(s)','Outputs joined by OFS'],
+    tip:"For CSV with quoted commas, use awk -F',' or python -c 'import csv...' instead — cut doesn't handle quoted fields.",
+  },
+  {
+    id:'tail', name:'tail', full:'Tail', level:'beginner',
+    category:'Text Processing', shortDesc:'View end of files (live logs)',
+    description:'Displays the last N lines of a file. The -f flag follows the file in real-time — making it the standard tool for monitoring live log files. You\'ll use this constantly.',
+    syntax:`<span class="syn-cmd">tail</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[file(s)]</span>`,
+    flags:[
+      {flag:'-n N', desc:'Show last N lines (default: 10)', ex:'tail -n 50 app.log'},
+      {flag:'-f', desc:'Follow: stream new lines as added', ex:'tail -f /var/log/nginx/access.log'},
+      {flag:'-F', desc:'Follow by name (survives log rotation)', ex:'tail -F app.log'},
+      {flag:'-c N', desc:'Show last N bytes', ex:'tail -c 1024 file'},
+    ],
+    examples:[
+      {label:'Live log monitoring', cmd:'tail -f /var/log/syslog', out:`Mar 15 10:22:31 host sshd[1234]: Connection accepted\nMar 15 10:22:32 host sshd[1234]: Authenticated user alice\n[new lines appear in real-time...]`, note:'Press Ctrl+C to stop. Standard for devops!'},
+      {label:'Last 100 lines', cmd:'tail -n 100 error.log', out:`[last 100 lines of error log]`, note:'Great for recent error context'},
+      {label:'Follow multiple files', cmd:'tail -f app.log error.log', out:`==> app.log <==\nINFO: Server started\n\n==> error.log <==\nERROR: DB timeout`, note:'Monitor multiple logs simultaneously'},
+    ],
+    flow:['tail seeks to end of file','Counts back N newlines','With -f: uses inotify to watch for changes','Writes new data to stdout'],
+    tip:'tail -f app.log | grep --line-buffered ERROR filters the stream! Essential for production debugging.',
+  },
+  {
+    id:'head', name:'head', full:'Head', level:'beginner',
+    category:'Text Processing', shortDesc:'View start of files',
+    description:'Displays the first N lines of a file. Perfect for peeking at file format/structure, checking CSV headers, or extracting the beginning of large files without loading them entirely.',
+    syntax:`<span class="syn-cmd">head</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[file(s)]</span>`,
+    flags:[
+      {flag:'-n N', desc:'Print first N lines', ex:'head -n 20 file.txt'},
+      {flag:'-c N', desc:'Print first N bytes', ex:'head -c 100 file.bin'},
+      {flag:'-q', desc:'Quiet: no filename headers', ex:'head -q -n5 *.txt'},
+    ],
+    examples:[
+      {label:'Check CSV header', cmd:'head -1 data.csv', out:`id,name,email,score,date`, note:'Quickly see column names'},
+      {label:'First 5 lines', cmd:'head -5 README.md', out:`# LinuxHub\n\n> Master the terminal, one command at a time.\n\n## Getting Started`, note:'Quick file preview'},
+    ],
+    flow:['head reads file from start','Stops after N lines/bytes','Efficient — doesn\'t load rest of file'],
+    tip:'head -1 is great for CSV headers. For the last line: tail -1. For line N: sed -n "Np" file.',
+  },
+
+  // ── PROCESS MANAGEMENT ──────────────────────────────────────────
+  {
+    id:'ps', name:'ps', full:'Process Status', level:'beginner',
+    category:'Process Management', shortDesc:'List running processes',
+    description:'Displays information about currently running processes. The snapshot-in-time complement to top/htop. The aux flags are the most commonly used combination to see all processes.',
+    syntax:`<span class="syn-cmd">ps</span> <span class="syn-opt">[options]</span>`,
+    flags:[
+      {flag:'aux', desc:'Show all processes with full details (BSD style)', ex:'ps aux'},
+      {flag:'-ef', desc:'Full format listing (System V style)', ex:'ps -ef'},
+      {flag:'--forest', desc:'Show process tree with ASCII art', ex:'ps aux --forest'},
+      {flag:'-p PID', desc:'Show specific process by PID', ex:'ps -p 1234'},
+      {flag:'-u user', desc:'Show processes for a user', ex:'ps -u alice'},
+    ],
+    examples:[
+      {label:'All processes', cmd:'ps aux', out:`USER       PID %CPU %MEM    VSZ   RSS TTY   STAT START   TIME COMMAND\nroot         1  0.0  0.1 168928 12344 ?     Ss   09:15   0:02 /sbin/init\nalice     1842  0.2  1.4 987654 56789 pts/0 Sl   09:20   0:45 /usr/bin/python3`, note:'The standard way to see all running processes'},
+      {label:'Find process by name', cmd:"ps aux | grep nginx", out:`www-data  2341  0.0  0.3 140236 12456 ?  Ss  10:15   0:00 nginx: master process\nwww-data  2342  0.0  0.1 140720  5678 ?  S   10:15   0:00 nginx: worker process`, note:'Grep to filter for specific service'},
+    ],
+    flow:['ps reads /proc filesystem','Parses each process\'s /proc/PID/stat','Formats output columns','Applies filters (user/pid) if specified'],
+    tip:'ps aux --sort=-%cpu | head -10 shows the top 10 CPU consumers right now. Combine with kill for quick cleanup.',
+  },
+  {
+    id:'top', name:'top', full:'Top', level:'beginner',
+    category:'Process Management', shortDesc:'Interactive process monitor',
+    description:'A real-time interactive process viewer and system monitor. Shows CPU, memory usage, load average, and running processes. Press q to quit, k to kill, M to sort by memory.',
+    syntax:`<span class="syn-cmd">top</span> <span class="syn-opt">[options]</span>`,
+    flags:[
+      {flag:'-u user', desc:'Show only user\'s processes', ex:'top -u alice'},
+      {flag:'-p PID', desc:'Monitor specific PID(s)', ex:'top -p 1234,5678'},
+      {flag:'-n N', desc:'Exit after N refresh cycles', ex:'top -n 1 -b > snapshot.txt'},
+      {flag:'-b', desc:'Batch mode (non-interactive, for scripts)', ex:'top -b -n1'},
+      {flag:'-d N', desc:'Update interval in seconds', ex:'top -d 2'},
+    ],
+    examples:[
+      {label:'Launch top', cmd:'top', out:`top - 10:22:31 up 4 days,  2:15,  2 users,  load: 0.52 0.48 0.44\nTasks: 248 total,   1 running, 247 sleeping\n%Cpu(s):  3.2 us,  1.1 sy,  0.0 ni, 95.4 id\nMiB Mem:  16384.0 total,   4231.2 free,   8542.1 used\n\n  PID USER      %CPU %MEM  COMMAND\n 2341 alice     12.5  3.2  chrome\n 1842 alice      8.2  2.1  code`, note:'Real-time updating. Press q to quit.'},
+    ],
+    flow:['top polls /proc every 3s (default)','Calculates CPU% as (delta ticks / elapsed)','Sorts by CPU% by default','Displays via ncurses UI'],
+    tip:'htop is a much better version of top — colorful, mouse-supported, easier to kill processes. Install with apt install htop.',
+  },
+  {
+    id:'kill', name:'kill', full:'Kill', level:'beginner',
+    category:'Process Management', shortDesc:'Send signals to processes',
+    description:'Sends signals to processes, most commonly to terminate them. Despite the name, kill sends any signal — SIGTERM (15) asks gracefully, SIGKILL (9) forces immediate termination.',
+    syntax:`<span class="syn-cmd">kill</span> <span class="syn-opt">[-signal]</span> <span class="syn-arg">PID [PID...]</span>`,
+    flags:[
+      {flag:'-15 / TERM', desc:'Graceful termination (default). Process can clean up', ex:'kill -15 1234'},
+      {flag:'-9 / KILL', desc:'Force kill — cannot be ignored or caught', ex:'kill -9 1234'},
+      {flag:'-1 / HUP', desc:'Hangup — reload config (for daemons)', ex:'kill -1 nginx_pid'},
+      {flag:'-l', desc:'List all available signals', ex:'kill -l'},
+    ],
+    examples:[
+      {label:'Graceful kill', cmd:'kill 2341', out:`# Process 2341 asked to terminate`, note:'Try SIGTERM first — always'},
+      {label:'Force kill', cmd:'kill -9 2341', out:`# Process 2341 forcefully terminated`, note:'Use when SIGTERM fails; no cleanup possible'},
+      {label:'Kill by name', cmd:"pkill -9 stuck_program", out:`# Process by name killed`, note:'pkill is often easier than finding PID first'},
+    ],
+    flow:['kill sends signal to process via OS','SIGTERM: process receives signal, can handle it','SIGKILL: kernel immediately destroys process','Zombie processes: parent must call wait()'],
+    warn:'kill -9 prevents the process from releasing resources cleanly — file corruption, incomplete writes, orphaned locks.',
+    tip:'pkill processname and killall processname kill by name. Use kill -0 PID to check if a process is alive without killing it.',
+  },
+  {
+    id:'jobs', name:'jobs', full:'Jobs', level:'intermediate',
+    category:'Process Management', shortDesc:'Manage background jobs',
+    description:'Lists jobs running in the current shell session (background/stopped). Works with fg, bg, and & to control job execution — the foundation of Unix job control.',
+    syntax:`<span class="syn-cmd">jobs</span> <span class="syn-opt">[options]</span>`,
+    flags:[
+      {flag:'-l', desc:'List PIDs alongside job numbers', ex:'jobs -l'},
+      {flag:'-r', desc:'Show only running jobs', ex:'jobs -r'},
+      {flag:'-s', desc:'Show only stopped jobs', ex:'jobs -s'},
+    ],
+    examples:[
+      {label:'Background jobs workflow', cmd:'sleep 100 &\ntar -czf backup.tar.gz /home &\njobs', out:`[1]  Running    sleep 100 &\n[2]+ Running    tar -czf backup.tar.gz /home &`, note:'& sends command to background'},
+      {label:'Bring to foreground', cmd:'fg %1', out:`sleep 100\n[running in foreground now]`, note:'%1 = job number from jobs list'},
+    ],
+    flow:['Shell maintains job table per session','& after command forks to background','Ctrl+Z suspends current foreground job','fg/bg move jobs between states'],
+    tip:'Ctrl+Z suspends, bg resumes in background, fg brings to foreground. nohup cmd & makes job survive terminal close.',
+  },
+
+  // ── PERMISSIONS ──────────────────────────────────────────
+  {
+    id:'chmod', name:'chmod', full:'Change Mode', level:'beginner',
+    category:'Permissions', shortDesc:'Change file permissions',
+    description:'Changes file/directory access permissions. Uses either symbolic notation (u+x, go-w) or octal notation (755, 644). Understanding permissions is fundamental to Linux security.',
+    syntax:`<span class="syn-cmd">chmod</span> <span class="syn-opt">[options]</span> <span class="syn-arg">mode file(s)</span>`,
+    flags:[
+      {flag:'-R', desc:'Recursive: apply to all files in directory', ex:'chmod -R 755 website/'},
+      {flag:'-v', desc:'Verbose output', ex:'chmod -v 644 *.conf'},
+      {flag:'+x', desc:'Add execute for all users', ex:'chmod +x script.sh'},
+      {flag:'u/g/o/a', desc:'User/Group/Other/All targets', ex:'chmod u+x,g-w file'},
+    ],
+    examples:[
+      {label:'Make script executable', cmd:'chmod +x deploy.sh', out:`# Script now executable`, note:'Most common use case'},
+      {label:'Secure config file', cmd:'chmod 600 ~/.ssh/id_rsa', out:`# Only owner can read/write`, note:'SSH keys MUST be 600 or SSH refuses to use them'},
+      {label:'Web directory', cmd:'chmod -R 755 /var/www/html/', out:`# rwxr-xr-x on all files/dirs`, note:'Owner: rwx, Group: r-x, Others: r-x'},
+    ],
+    flow:['Octal: 4=read, 2=write, 1=exec','755 = rwx(owner) r-x(group) r-x(others)','Symbolic: u=user, g=group, o=other, a=all','+add, -remove, =set permissions'],
+    tip:'Quick cheat: 777=all, 755=web, 700=private dir, 644=public file, 600=private file. chmod -x never on directories!',
+  },
+  {
+    id:'chown', name:'chown', full:'Change Owner', level:'intermediate',
+    category:'Permissions', shortDesc:'Change file owner/group',
+    description:'Changes the owner and/or group of files and directories. Critical for security — correct ownership ensures users can only access their own files.',
+    syntax:`<span class="syn-cmd">chown</span> <span class="syn-opt">[options]</span> <span class="syn-arg">user[:group] file(s)</span>`,
+    flags:[
+      {flag:'-R', desc:'Recursive', ex:'chown -R www-data:www-data /var/www/'},
+      {flag:'-v', desc:'Verbose', ex:'chown -v alice:users file.txt'},
+      {flag:'--from', desc:'Only change if current owner matches', ex:"chown --from=root alice file"},
+    ],
+    examples:[
+      {label:'Change owner', cmd:'chown alice report.pdf', out:`# alice now owns report.pdf`, note:''},
+      {label:'Change owner and group', cmd:'chown www-data:www-data /var/www/html/', out:`# Web server owns web files`, note:'Critical for web server permissions'},
+      {label:'Recursive ownership', cmd:'sudo chown -R alice:developers /opt/project/', out:`# Entire project owned by alice:developers`, note:''},
+    ],
+    flow:['chown calls chown()/lchown() syscall','Kernel updates inode owner/group fields','Only root can give away files to other users'],
+    tip:'chown user: (with colon, no group) changes owner and sets group to user\'s primary group automatically.',
+  },
+  {
+    id:'sudo', name:'sudo', full:'Superuser Do', level:'beginner',
+    category:'Permissions', shortDesc:'Execute as superuser',
+    description:'Runs commands with elevated (superuser/root) privileges. Safer than logging in as root — provides audit trail, granular control, and requires your own password.',
+    syntax:`<span class="syn-cmd">sudo</span> <span class="syn-opt">[options]</span> <span class="syn-arg">command</span>`,
+    flags:[
+      {flag:'-i', desc:'Start interactive root shell', ex:'sudo -i'},
+      {flag:'-u user', desc:'Run as specific user', ex:'sudo -u www-data cmd'},
+      {flag:'-l', desc:'List allowed sudo commands', ex:'sudo -l'},
+      {flag:'-k', desc:'Invalidate cached credentials', ex:'sudo -k'},
+      {flag:'!!', desc:'Re-run last command with sudo', ex:'sudo !!'},
+    ],
+    examples:[
+      {label:'Install package', cmd:'sudo apt install nginx', out:`[sudo] password for alice: \nReading package lists... Done\nSetting up nginx...`, note:'Most common sudo use'},
+      {label:'Edit system config', cmd:'sudo nano /etc/hosts', out:`# Opens /etc/hosts in editor with root permissions`, note:''},
+      {label:'Re-run as root', cmd:'sudo !!', out:`# Previous command re-run with sudo`, note:'!! expands to last command — huge time saver'},
+    ],
+    flow:['sudo checks /etc/sudoers for permission','Prompts for YOUR password (not root\'s)','Forks child process as target user','Logs action to /var/log/auth.log'],
+    warn:'Never run sudo curl | bash or sudo pip install randomly. Verify what you\'re executing first!',
+    tip:'sudo -s gives you a root shell. sudo visudo safely edits sudoers file (validates syntax before saving).',
+  },
+
+  // ── SYSTEM INFO ──────────────────────────────────────────
+  {
+    id:'df', name:'df', full:'Disk Free', level:'beginner',
+    category:'System Info', shortDesc:'Show disk space usage',
+    description:'Reports disk space usage of filesystems. Essential for monitoring server storage — "no space left on device" errors are found with df before they cause problems.',
+    syntax:`<span class="syn-cmd">df</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[filesystem]</span>`,
+    flags:[
+      {flag:'-h', desc:'Human-readable sizes (GB, MB)', ex:'df -h'},
+      {flag:'-T', desc:'Show filesystem type', ex:'df -hT'},
+      {flag:'-i', desc:'Show inode usage instead of block usage', ex:'df -i'},
+      {flag:'--total', desc:'Add grand total row', ex:'df -h --total'},
+    ],
+    examples:[
+      {label:'Disk usage overview', cmd:'df -h', out:`Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1        98G   45G   48G  49% /\n/dev/sda2       500G  380G  120G  76% /data\ntmpfs           7.8G  1.2G  6.6G  16% /run`, note:'Check this regularly on servers'},
+      {label:'With filesystem type', cmd:'df -hT', out:`Filesystem Type  Size  Used Avail Use% Mounted on\n/dev/sda1  ext4   98G   45G   48G  49% /\ntmpfs      tmpfs 7.8G  1.2G  6.6G  16% /run`, note:''},
+    ],
+    flow:['df calls statfs() for each mounted filesystem','Reads total blocks, used blocks, inodes','Formats into human-readable output'],
+    warn:'When Use% hits 95%+, many services start failing. Set up monitoring alerts at 80-85%.',
+    tip:'df -h / shows just root filesystem. For inode exhaustion (can\'t create files despite space): df -i',
+  },
+  {
+    id:'du', name:'du', full:'Disk Usage', level:'beginner',
+    category:'System Info', shortDesc:'Show directory disk usage',
+    description:'Estimates disk usage of files and directories. Unlike df (whole filesystem), du shows you WHICH directories are consuming space — essential for finding what\'s eating your disk.',
+    syntax:`<span class="syn-cmd">du</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[path(s)]</span>`,
+    flags:[
+      {flag:'-h', desc:'Human-readable output', ex:'du -h /var'},
+      {flag:'-s', desc:'Summary: total only, no subdirectory details', ex:'du -sh *'},
+      {flag:'-d N', desc:'Depth: only N levels deep', ex:'du -hd2 /home'},
+      {flag:'--exclude', desc:'Exclude matching files', ex:"du -h --exclude='*.log'"},
+      {flag:'-a', desc:'All: include individual files', ex:'du -ah /etc'},
+    ],
+    examples:[
+      {label:'Top disk consumers', cmd:'du -sh * | sort -rh | head -10', out:`12G  Videos\n4.2G Downloads\n1.8G .local\n852M Music\n421M Documents`, note:'Your go-to command for finding large directories'},
+      {label:'Folder summary', cmd:'du -sh /var/*/', out:`4.0K /var/backups\n 18M /var/cache\n 14G /var/log\n 2.1G /var/lib`, note:'Quick breakdown at one level'},
+    ],
+    flow:['du walks directory tree recursively','Calls stat() or lstat() on each entry','Accumulates block counts','Reports at each level (or summary with -s)'],
+    tip:'du -sh .* shows hidden directory sizes too. Pipe through sort -rh | head for quick top-N large directories.',
+  },
+  {
+    id:'free', name:'free', full:'Free Memory', level:'beginner',
+    category:'System Info', shortDesc:'Show memory usage',
+    description:'Displays total, used, and free RAM and swap space. Understanding the "available" column (not just "free") is key — Linux uses spare RAM for caching to improve performance.',
+    syntax:`<span class="syn-cmd">free</span> <span class="syn-opt">[options]</span>`,
+    flags:[
+      {flag:'-h', desc:'Human-readable output', ex:'free -h'},
+      {flag:'-s N', desc:'Repeat display every N seconds', ex:'free -h -s 2'},
+      {flag:'-m', desc:'Show in megabytes', ex:'free -m'},
+      {flag:'-g', desc:'Show in gigabytes', ex:'free -g'},
+    ],
+    examples:[
+      {label:'Memory overview', cmd:'free -h', out:`              total        used        free      shared  buff/cache   available\nMem:           15Gi        5.2Gi       2.1Gi       420Mi       8.1Gi        9.8Gi\nSwap:         2.0Gi          0B        2.0Gi`, note:'Look at "available" not "free" — cached memory can be reclaimed'},
+    ],
+    flow:['"free" is truly unused RAM','buff/cache is kernel cache (reusable)','available = free + reclaimable cache','Swap: used when RAM is exhausted'],
+    tip:'"available" is the real usable memory number. Linux deliberately uses RAM for caching — that\'s not a problem!',
+  },
+  {
+    id:'uname', name:'uname', full:'Unix Name', level:'beginner',
+    category:'System Info', shortDesc:'Show system information',
+    description:'Prints system information including kernel version, machine type, and OS. A quick way to identify the system you\'re working on, especially important in scripts for compatibility.',
+    syntax:`<span class="syn-cmd">uname</span> <span class="syn-opt">[options]</span>`,
+    flags:[
+      {flag:'-a', desc:'All information', ex:'uname -a'},
+      {flag:'-r', desc:'Kernel release version', ex:'uname -r'},
+      {flag:'-s', desc:'Kernel name', ex:'uname -s'},
+      {flag:'-m', desc:'Machine hardware (x86_64, arm64)', ex:'uname -m'},
+      {flag:'-n', desc:'Network node hostname', ex:'uname -n'},
+    ],
+    examples:[
+      {label:'Full system info', cmd:'uname -a', out:`Linux myserver 5.15.0-100-generic #110-Ubuntu SMP Thu Feb 22 20:22:49 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux`, note:'Kernel, hostname, version, arch in one line'},
+      {label:'Kernel version', cmd:'uname -r', out:`5.15.0-100-generic`, note:'Useful for kernel-specific troubleshooting'},
+    ],
+    flow:['uname calls uname() syscall','Kernel fills struct utsname','Output formatted by flags'],
+    tip:'cat /etc/os-release gives distro name/version. hostnamectl gives comprehensive OS/hardware info on systemd systems.',
+  },
+
+  // ── NETWORKING ──────────────────────────────────────────
+  {
+    id:'ping', name:'ping', full:'Ping', level:'beginner',
+    category:'Networking', shortDesc:'Test network connectivity',
+    description:'Tests reachability of a host by sending ICMP echo requests and measuring response times. First tool to run when diagnosing network issues.',
+    syntax:`<span class="syn-cmd">ping</span> <span class="syn-opt">[options]</span> <span class="syn-arg">host</span>`,
+    flags:[
+      {flag:'-c N', desc:'Stop after N packets', ex:'ping -c 4 google.com'},
+      {flag:'-i N', desc:'Interval between packets (seconds)', ex:'ping -i 0.2 host'},
+      {flag:'-t N', desc:'TTL value', ex:'ping -t 64 host'},
+      {flag:'-s N', desc:'Packet size in bytes', ex:'ping -s 1472 host'},
+    ],
+    examples:[
+      {label:'Basic connectivity', cmd:'ping -c 4 google.com', out:`PING google.com (142.250.180.46) 56(84) bytes of data.\n64 bytes from 142.250.180.46: icmp_seq=1 ttl=116 time=12.3 ms\n64 bytes from 142.250.180.46: icmp_seq=2 ttl=116 time=11.8 ms\n\n--- google.com ping statistics ---\n4 packets transmitted, 4 received, 0% packet loss`, note:'0% packet loss = connected. Time < 20ms = local network. 100ms+ = overseas.'},
+    ],
+    flow:['ping sends ICMP Echo Request','Remote host replies with Echo Reply','Time measured (RTT)','TTL decremented at each hop'],
+    tip:'Packet loss > 0% = network issue. High variance in time = congestion/poor connection. Check both IP and name to isolate DNS vs network issues.',
+  },
+  {
+    id:'curl', name:'curl', full:'Client URL', level:'intermediate',
+    category:'Networking', shortDesc:'Transfer data from URLs',
+    description:'A versatile command-line tool for transferring data with URLs. Makes HTTP requests, downloads files, tests APIs, follows redirects, handles authentication — the swiss army knife of web communication.',
+    syntax:`<span class="syn-cmd">curl</span> <span class="syn-opt">[options]</span> <span class="syn-arg">URL</span>`,
+    flags:[
+      {flag:'-X', desc:'HTTP method (GET/POST/PUT/DELETE)', ex:"curl -X POST url"},
+      {flag:'-H', desc:'Add header', ex:'curl -H "Content-Type: application/json" url'},
+      {flag:'-d', desc:'POST data', ex:"curl -d '{\"key\":\"val\"}' url"},
+      {flag:'-o', desc:'Output to file', ex:'curl -o file.zip url'},
+      {flag:'-O', desc:'Save with original filename', ex:'curl -O https://example.com/file.tar.gz'},
+      {flag:'-L', desc:'Follow redirects', ex:'curl -L url'},
+      {flag:'-s', desc:'Silent mode', ex:'curl -s url'},
+      {flag:'-I', desc:'Headers only', ex:'curl -I url'},
+      {flag:'-u', desc:'Username:password auth', ex:'curl -u user:pass url'},
+    ],
+    examples:[
+      {label:'Download file', cmd:'curl -LO https://example.com/setup.tar.gz', out:`  % Total    % Received  % Xferd\n100 24.5M  100 24.5M    0     0  8.2M      0  0:00:03`, note:'-L follows redirects, -O saves with original name'},
+      {label:'Test REST API', cmd:'curl -s -X GET https://api.example.com/users | python3 -m json.tool', out:`{\n  "users": [\n    {"id": 1, "name": "Alice"},\n    {"id": 2, "name": "Bob"}\n  ]\n}`, note:'pipe to python3 for pretty-print JSON'},
+      {label:'POST JSON data', cmd:"curl -X POST -H 'Content-Type: application/json' -d '{\"name\":\"Alice\"}' https://api.example.com/users", out:`{"id": 42, "name": "Alice", "created": "2024-03-15"}`, note:'Standard REST API call'},
+    ],
+    flow:['curl resolves hostname (DNS)','Establishes TCP connection','Sends HTTP request with headers/body','Reads response and outputs'],
+    tip:'curl -v shows full request/response headers for debugging. curl -w "%{time_total}\\n" measures response time.',
+  },
+  {
+    id:'ssh', name:'ssh', full:'Secure Shell', level:'intermediate',
+    category:'Networking', shortDesc:'Secure remote login',
+    description:'Encrypted remote login protocol. Connects to remote servers securely over an encrypted channel. Understanding SSH is essential for any server administration, deployment, or DevOps work.',
+    syntax:`<span class="syn-cmd">ssh</span> <span class="syn-opt">[options]</span> <span class="syn-arg">[user@]host</span>`,
+    flags:[
+      {flag:'-i', desc:'Specify identity (private key) file', ex:'ssh -i ~/.ssh/mykey.pem user@host'},
+      {flag:'-p', desc:'Port number (default 22)', ex:'ssh -p 2222 user@host'},
+      {flag:'-L', desc:'Local port forwarding (tunnel)', ex:'ssh -L 8080:localhost:80 user@host'},
+      {flag:'-N', desc:'No commands, only forwarding', ex:'ssh -N -L 8080:localhost:80 user@host'},
+      {flag:'-v', desc:'Verbose for debugging', ex:'ssh -v user@host'},
+    ],
+    examples:[
+      {label:'Connect to server', cmd:'ssh alice@192.168.1.100', out:`The authenticity of host '192.168.1.100' can't be established.\nAre you sure you want to continue connecting? yes\nWelcome to Ubuntu 22.04.3 LTS\nalice@server:~$`, note:'First connection asks to verify fingerprint'},
+      {label:'Run remote command', cmd:"ssh user@server 'df -h && free -h'", out:`Filesystem      Size  Used Avail Use%\n/dev/sda1        98G   45G   48G  49% /\n\nMem:  15Gi  5.2Gi  2.1Gi`, note:'Run commands without interactive session'},
+      {label:'Create tunnel', cmd:'ssh -N -L 5432:localhost:5432 dbserver', out:`# Now connect to localhost:5432 to reach remote DB`, note:'Secure tunnel to access remote services'},
+    ],
+    flow:['TCP connect to port 22','Negotiate algorithms (KEX)','Server sends public key','Client authenticates (key or password)','Encrypted session established'],
+    tip:'Use ssh-keygen to create key pairs, ssh-copy-id to install your public key. Then: passwordless, secure login!',
+  },
+  {
+    id:'netstat', name:'ss', full:'Socket Statistics (ss/netstat)', level:'intermediate',
+    category:'Networking', shortDesc:'Show network connections',
+    description:'ss (socket statistics) is the modern replacement for netstat. Shows all active connections, listening ports, and socket states. Essential for debugging "what\'s using port X" issues.',
+    syntax:`<span class="syn-cmd">ss</span> <span class="syn-opt">[options]</span>`,
+    flags:[
+      {flag:'-t', desc:'TCP sockets', ex:'ss -t'},
+      {flag:'-u', desc:'UDP sockets', ex:'ss -u'},
+      {flag:'-l', desc:'Listening sockets only', ex:'ss -l'},
+      {flag:'-n', desc:'Numeric ports (no name resolution)', ex:'ss -tn'},
+      {flag:'-p', desc:'Show process using the socket', ex:'ss -tlnp'},
+      {flag:'-a', desc:'All sockets (listening + connected)', ex:'ss -tan'},
+    ],
+    examples:[
+      {label:'Listening TCP ports', cmd:'ss -tlnp', out:`State  Recv-Q Send-Q  Local Address:Port  Peer Address:Port  Process\nLISTEN 0      128         0.0.0.0:22         0.0.0.0:*      pid=1234,/sshd\nLISTEN 0      511         0.0.0.0:80         0.0.0.0:*      pid=2341,/nginx\nLISTEN 0      128         0.0.0.0:5432       0.0.0.0:*      pid=3456,/postgres`, note:'See every open port and what process holds it'},
+    ],
+    flow:['ss reads kernel netlink socket data','Faster than netstat (no /proc parsing)','Filters applied post-read'],
+    tip:'ss -tlnp | grep :80 to find what\'s on port 80. lsof -i :80 is another approach showing more details.',
+  },
+
+  // ── ADVANCED ──────────────────────────────────────────
+  {
+    id:'find', name:'find', full:'Find', level:'intermediate',
+    category:'Advanced Search', shortDesc:'Search for files in filesystem',
+    description:'Recursively searches directories for files matching various criteria — name, size, modification time, permissions, type. One of the most powerful file discovery tools with hundreds of possible expressions.',
+    syntax:`<span class="syn-cmd">find</span> <span class="syn-arg">path</span> <span class="syn-opt">[expression]</span>`,
+    flags:[
+      {flag:'-name', desc:'Match filename pattern (case-sensitive)', ex:"find . -name '*.log'"},
+      {flag:'-iname', desc:'Match filename (case-insensitive)', ex:"find . -iname '*.TXT'"},
+      {flag:'-type', desc:'f=file, d=dir, l=symlink', ex:'find . -type f'},
+      {flag:'-size', desc:'+N/-N for bigger/smaller than N', ex:'find . -size +100M'},
+      {flag:'-mtime', desc:'+N days ago modified', ex:'find . -mtime -7'},
+      {flag:'-perm', desc:'Match permissions', ex:'find . -perm 777'},
+      {flag:'-exec', desc:'Execute command on each result', ex:"find . -name '*.py' -exec wc -l {} +"},
+      {flag:'-delete', desc:'Delete found files (dangerous!)', ex:"find /tmp -name '*.tmp' -mtime +7 -delete"},
+    ],
+    examples:[
+      {label:'Find large files', cmd:'find /home -size +500M -type f', out:`/home/alice/Videos/screencast.mkv\n/home/alice/Downloads/ubuntu.iso`, note:'Quickly locate space hogs'},
+      {label:'Find recent logs', cmd:'find /var/log -name "*.log" -mtime -1', out:`/var/log/nginx/access.log\n/var/log/syslog\n/var/log/auth.log`, note:'Files modified in the last 24h'},
+      {label:'Find+exec', cmd:"find . -name '*.py' -exec grep -l 'import pandas' {} +", out:`./analysis/data_clean.py\n./ml/train_model.py`, note:'{} is placeholder, + batches for efficiency'},
+    ],
+    flow:['find walks directory tree','Tests each file against expressions','AND logic between multiple -flags','Actions (-exec, -delete) applied to matches'],
+    warn:'-delete is permanent with no confirmation! Always run the find command first without -delete to preview results.',
+    tip:'find . -name "*.bak" -delete is a clean-up one-liner. Use -maxdepth N to limit recursion depth.',
+  },
+  {
+    id:'xargs', name:'xargs', full:'Extended Arguments', level:'intermediate',
+    category:'Advanced Search', shortDesc:'Build commands from stdin',
+    description:'Reads items from stdin and passes them as arguments to another command. Bridges the gap between commands that output filenames and commands that need arguments — essential for powerful pipelines.',
+    syntax:`<span class="syn-cmd">xargs</span> <span class="syn-opt">[options]</span> <span class="syn-arg">command</span>`,
+    flags:[
+      {flag:'-I {}', desc:'Replace {} with each input item', ex:"echo test.txt | xargs -I{} cp {} {}.bak"},
+      {flag:'-n N', desc:'Pass max N args per command invocation', ex:'xargs -n 2 echo'},
+      {flag:'-P N', desc:'Run N processes in parallel', ex:'xargs -P 4 -n1 gzip'},
+      {flag:'-0', desc:'Null-delimited input (safe with spaces in filenames)', ex:'find . -print0 | xargs -0 rm'},
+      {flag:'-a file', desc:'Read from file instead of stdin', ex:'xargs -a list.txt rm'},
+    ],
+    examples:[
+      {label:'Delete found files', cmd:"find . -name '*.tmp' | xargs rm -f", out:`# All .tmp files removed`, note:'Classic find + xargs pattern'},
+      {label:'Parallel compression', cmd:'ls *.log | xargs -P 4 -n1 gzip', out:`# 4 files compressed in parallel`, note:'-P 4 uses 4 CPU cores simultaneously'},
+      {label:'Rename batch', cmd:"find . -name '*.jpeg' | xargs -I{} bash -c 'mv {} \${{}%.jpeg}.jpg'", out:`# All .jpeg renamed to .jpg`, note:'Complex substitutions with -I'},
+    ],
+    flow:['xargs reads stdin line by line (or null-delimited)','Batches items into argument lists','Executes command with each batch','-P runs multiple commands in parallel'],
+    tip:'Always use find -print0 | xargs -0 when filenames might have spaces — regular whitespace splitting breaks on spaces!',
+  },
+  {
+    id:'pipe', name:'|', full:'Pipe Operator', level:'beginner',
+    category:'Advanced Search', shortDesc:'Chain commands together',
+    description:'Connects the stdout of one command to the stdin of another, creating a processing pipeline. The pipe is the philosophical heart of Unix — do one thing, do it well, and compose tools together.',
+    syntax:`<span class="syn-cmd">command1</span> <span class="syn-opt">|</span> <span class="syn-arg">command2 | command3...</span>`,
+    flags:[
+      {flag:'|', desc:'Standard pipe: stdout → stdin', ex:'ls -lah | grep "^d"'},
+      {flag:'|&', desc:'Both stdout and stderr to next command', ex:'cmd |& tee output.txt'},
+      {flag:'tee', desc:'Split: write to file AND pass along', ex:'cmd | tee file | next_cmd'},
+    ],
+    examples:[
+      {label:'Find large dirs', cmd:'du -sh /* 2>/dev/null | sort -rh | head -5', out:`42G  /home\n18G  /var\n 8G  /usr\n 2G  /opt\n 1G  /tmp`, note:'Three commands, two pipes, one powerful result'},
+      {label:'Live log filtering', cmd:'tail -f app.log | grep --line-buffered "ERROR" | tee errors.txt', out:`2024-03-15 10:22 ERROR DB connection timeout\n2024-03-15 10:23 ERROR Retry 1/3 failed`, note:'Filter live logs AND save to file simultaneously'},
+      {label:'Word frequency', cmd:"cat article.txt | tr -s ' ' '\\n' | tr '[:upper:]' '[:lower:]' | sort | uniq -c | sort -rn | head -10", out:`     42 the\n     28 linux\n     19 command\n     15 file`, note:'5-pipe text analysis pipeline'},
+    ],
+    flow:['Shell creates pipe (pair of file descriptors)','command1 stdout → write end of pipe','command2 stdin ← read end of pipe','Both run concurrently! Data streams in real-time'],
+    tip:'The | (pipe) philosophy: small, sharp tools that do one thing well. 10 simple commands chained > 1 complex program.',
+  },
+  {
+    id:'redirect', name:'>', full:'Redirection Operators', level:'beginner',
+    category:'Advanced Search', shortDesc:'Redirect input and output',
+    description:'Controls where input comes from and where output goes. Mastering redirection (<, >, >>, 2>, &>) is fundamental to scripting, logging, and building complex data pipelines.',
+    syntax:`<span class="syn-cmd">command</span> <span class="syn-opt">> file</span>  <span class="syn-cmd">command</span> <span class="syn-opt">>> file</span>  <span class="syn-cmd">command</span> <span class="syn-opt">2> err</span>`,
+    flags:[
+      {flag:'>', desc:'Redirect stdout (overwrite)', ex:'ls > filelist.txt'},
+      {flag:'>>', desc:'Redirect stdout (append)', ex:'echo "log" >> app.log'},
+      {flag:'<', desc:'Redirect stdin from file', ex:'sort < unsorted.txt'},
+      {flag:'2>', desc:'Redirect stderr only', ex:'cmd 2> errors.log'},
+      {flag:'&>', desc:'Redirect both stdout and stderr', ex:'cmd &> output.log'},
+      {flag:'2>&1', desc:'Redirect stderr to same place as stdout', ex:'cmd > out.log 2>&1'},
+    ],
+    examples:[
+      {label:'Save command output', cmd:'ls -lah > directory_listing.txt', out:`# Output saved to file (not shown in terminal)`, note:'> overwrites the file'},
+      {label:'Append to log', cmd:'echo "$(date): Backup started" >> backup.log', out:`# Line added to backup.log`, note:'>> appends, never overwrites'},
+      {label:'Capture errors', cmd:'make 2> build_errors.log', out:`# Compile output shown, errors saved to file`, note:'stderr (2) goes to file, stdout to terminal'},
+      {label:'Capture everything', cmd:'./script.sh &> full_output.log', out:`# Both stdout and stderr saved`, note:'Best for cron jobs where you want all output'},
+    ],
+    flow:['Shell sets up file descriptors before exec','FD 0=stdin, FD 1=stdout, FD 2=stderr','> opens file with O_TRUNC (overwrite)','>> opens with O_APPEND flag'],
+    tip:'/dev/null is the "black hole" — > /dev/null discards output, 2>/dev/null silences errors.',
+  },
+
+  // ── SCRIPTING ──────────────────────────────────────────
+  {
+    id:'bash', name:'bash', full:'Bash Scripting', level:'intermediate',
+    category:'Scripting', shortDesc:'Write shell scripts',
+    description:'Bash (Bourne Again SHell) is both a command interpreter and a scripting language. Shell scripts automate repetitive tasks, system administration, and complex workflows.',
+    syntax:`<span class="syn-cmd">#!/bin/bash</span>  <span class="syn-meta"># shebang at top of script</span>`,
+    flags:[
+      {flag:'#!/bin/bash', desc:'Shebang: specifies interpreter', ex:'#!/bin/bash'},
+      {flag:'-x', desc:'Trace: print each command as executed', ex:'bash -x script.sh'},
+      {flag:'-e', desc:'Exit on first error', ex:'bash -e script.sh'},
+      {flag:'-u', desc:'Error on undefined variable', ex:'bash -u script.sh'},
+      {flag:'-n', desc:'Syntax check without running', ex:'bash -n script.sh'},
+    ],
+    examples:[
+      {label:'Hello world script', cmd:'cat backup.sh', out:`#!/bin/bash\nset -euo pipefail\n\nDATE=$(date +%Y-%m-%d)\nBACKUP_DIR="/backup/$DATE"\n\nmkdir -p "$BACKUP_DIR"\ncp -r /home/alice "$BACKUP_DIR/"\necho "Backup completed: $BACKUP_DIR"`, note:'set -euo pipefail: exit on error, undefined vars, pipe failures'},
+      {label:'Run the script', cmd:'chmod +x backup.sh && ./backup.sh', out:`Backup completed: /backup/2024-03-15`, note:'Make executable, then run'},
+    ],
+    flow:['Shebang tells kernel which interpreter to use','bash reads script line by line','Variables stored in environment','$() captures command output','Exit code: 0=success, non-zero=error'],
+    tip:'Always start scripts with set -euo pipefail — it makes them fail fast and loud on problems. Use shellcheck to lint scripts!',
+  },
+  {
+    id:'cron', name:'crontab', full:'Cron Table', level:'intermediate',
+    category:'Scripting', shortDesc:'Schedule recurring tasks',
+    description:'Schedules commands to run automatically at specified intervals. The cron daemon checks crontab files every minute and runs matching jobs. Essential for maintenance tasks, backups, and monitoring.',
+    syntax:`<span class="syn-meta"># Format: minute hour day month weekday command</span>\n<span class="syn-cmd">*  *  *  *  *</span>  <span class="syn-arg">command</span>`,
+    flags:[
+      {flag:'-e', desc:'Edit crontab for current user', ex:'crontab -e'},
+      {flag:'-l', desc:'List current crontab', ex:'crontab -l'},
+      {flag:'-r', desc:'Remove all crontab entries', ex:'crontab -r'},
+      {flag:'-u user', desc:'Edit another user\'s crontab (root)', ex:'crontab -u alice -e'},
+    ],
+    examples:[
+      {label:'Common cron schedules', cmd:'crontab -l', out:`# Every day at 2:30 AM: backup\n30 2 * * * /home/alice/backup.sh\n\n# Every 15 minutes: check service\n*/15 * * * * /usr/local/bin/health_check.sh\n\n# Every Monday 9 AM: weekly report\n0 9 * * 1 /scripts/weekly_report.py\n\n# First day of month: cleanup logs\n0 0 1 * * find /var/log -name "*.log" -mtime +30 -delete`, note:'The 5 fields: min hour day month weekday'},
+    ],
+    flow:['cron daemon runs as system service','Every minute: reads all crontab files','Matches current time to schedules','Forks and executes matching commands','Emails output to user (unless redirected)'],
+    tip:'Use cron.guru website to build/test crontab expressions visually. Always use full paths in cron — $PATH is minimal!',
+  },
+  {
+    id:'env', name:'env', full:'Environment', level:'intermediate',
+    category:'Scripting', shortDesc:'Environment variables',
+    description:'Environment variables are key-value pairs passed to processes. They configure program behavior, store paths, credentials, and settings. Understanding them is crucial for scripting and devops.',
+    syntax:`<span class="syn-cmd">export</span> <span class="syn-arg">VAR=value</span>  <span class="syn-cmd">env</span>  <span class="syn-cmd">printenv</span>`,
+    flags:[
+      {flag:'export', desc:'Set and export variable to child processes', ex:"export PATH=$PATH:/opt/myapp/bin"},
+      {flag:'printenv', desc:'Print all or specific env variables', ex:'printenv HOME'},
+      {flag:'env', desc:'Show all environment or run with modified env', ex:"env NODE_ENV=production node app.js"},
+      {flag:'unset', desc:'Remove a variable', ex:'unset TEMP_TOKEN'},
+    ],
+    examples:[
+      {label:'View all variables', cmd:'env | sort | head -15', out:`DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000\nHOME=/home/alice\nLANG=en_US.UTF-8\nPATH=/usr/local/bin:/usr/bin:/bin:/home/alice/.local/bin\nSHELL=/bin/bash\nUSER=alice`, note:'Every process inherits these on start'},
+      {label:'Add to PATH', cmd:"echo 'export PATH=$PATH:~/.local/bin' >> ~/.bashrc && source ~/.bashrc", out:`# New directory added to search path permanently`, note:'~/.bashrc loads on every new shell'},
+    ],
+    flow:['Shell inherits env from parent (fork)','export marks var for child processes','$VAR expands at shell parse time','env shows the process\'s current environment'],
+    tip:'.env files: use direnv or source .env for project-specific variables. Never commit .env files with secrets!',
+  },
+
+  // ── ADVANCED ──────────────────────────────────────────
+  {
+    id:'strace', name:'strace', full:'System Call Tracer', level:'advanced',
+    category:'Advanced Tools', shortDesc:'Trace system calls',
+    description:'Traces system calls and signals made by a process. Invaluable for debugging mysterious failures — you can see exactly what files a program opens, what network calls it makes, and where it fails.',
+    syntax:`<span class="syn-cmd">strace</span> <span class="syn-opt">[options]</span> <span class="syn-arg">command</span>`,
+    flags:[
+      {flag:'-e trace=X', desc:'Trace specific syscall category', ex:'strace -e trace=file ls'},
+      {flag:'-p PID', desc:'Attach to running process', ex:'strace -p 1234'},
+      {flag:'-o file', desc:'Write output to file', ex:'strace -o out.txt cmd'},
+      {flag:'-c', desc:'Print syscall statistics summary', ex:'strace -c ls'},
+      {flag:'-f', desc:'Follow child processes (fork)', ex:'strace -f ./script.sh'},
+    ],
+    examples:[
+      {label:'Trace file opens', cmd:'strace -e trace=openat,read ls /home 2>&1 | head -20', out:`openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3\nopenat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY) = 3\nopenat(AT_FDCWD, "/home", O_RDONLY|O_DIRECTORY) = 3`, note:'See every file the process opens'},
+      {label:'Count syscalls', cmd:'strace -c cat /dev/null', out:`% time     seconds  usecs/call     calls syscall\n  0.00    0.000000           0         4 read\n  0.00    0.000000           0         2 write\n  0.00    0.000000           0         8 openat\n  0.00    0.000000           0        18 mmap`, note:'Performance profiling at syscall level'},
+    ],
+    flow:['strace uses ptrace() to intercept syscalls','Each syscall: entry arguments + exit return value','Kernel pauses process for strace to inspect','Significant overhead — not for production!'],
+    tip:'strace -p $(pgrep nginx) diagnoses a stuck process. Look for ENOENT (file not found) or EACCES (permission denied) errors.',
+  },
+  {
+    id:'tmux', name:'tmux', full:'Terminal Multiplexer', level:'advanced',
+    category:'Advanced Tools', shortDesc:'Persistent terminal sessions',
+    description:'A terminal multiplexer — create multiple windows/panes in one terminal, detach sessions that keep running when you disconnect (essential for remote work!), and reattach later.',
+    syntax:`<span class="syn-cmd">tmux</span>  <span class="syn-meta"># then: Ctrl+B prefix key</span>`,
+    flags:[
+      {flag:'new -s name', desc:'Create named session', ex:'tmux new -s work'},
+      {flag:'attach -t name', desc:'Reattach to session', ex:'tmux attach -t work'},
+      {flag:'ls', desc:'List all sessions', ex:'tmux ls'},
+      {flag:'kill-session', desc:'Destroy a session', ex:'tmux kill-session -t work'},
+    ],
+    examples:[
+      {label:'Start + detach session', cmd:'tmux new -s deploy\n# ... run long deployment ...\n# Ctrl+B then D to detach', out:`[detached (from session deploy)]`, note:'Session lives on after you disconnect!'},
+      {label:'Reattach later', cmd:'tmux attach -t deploy', out:`# Back in the session exactly where you left it`, note:'Even after SSH disconnect + reconnect'},
+    ],
+    flow:['tmux runs as server process','Clients attach to shared sessions','Ctrl+B: prefix for all tmux commands','Sessions persist until server killed'],
+    tip:'Key shortcuts: Ctrl+B % = vertical split, Ctrl+B " = horizontal split, Ctrl+B arrows = move between panes, Ctrl+B D = detach.',
+  },
+  {
+    id:'lsof', name:'lsof', full:'List Open Files', level:'advanced',
+    category:'Advanced Tools', shortDesc:'List open files and sockets',
+    description:'Lists all open files — and in Linux, everything is a file: regular files, directories, sockets, devices, pipes. Powerful for diagnosing "file in use" errors and network debugging.',
+    syntax:`<span class="syn-cmd">lsof</span> <span class="syn-opt">[options]</span>`,
+    flags:[
+      {flag:'-p PID', desc:'Files opened by process', ex:'lsof -p 1234'},
+      {flag:'-u user', desc:'Files opened by user', ex:'lsof -u alice'},
+      {flag:'-i :port', desc:'Sockets on specific port', ex:'lsof -i :8080'},
+      {flag:'+D dir', desc:'Files open in directory', ex:'lsof +D /var/log'},
+      {flag:'-n', desc:'No DNS lookup (faster)', ex:'lsof -n -i'},
+    ],
+    examples:[
+      {label:'What is on port 8080?', cmd:'lsof -i :8080', out:`COMMAND  PID  USER FD TYPE DEVICE SIZE NODE NAME\nnodeapp 2341 alice  22u IPv4  54321 0t0  TCP *:http-alt (LISTEN)`, note:'Instantly identify what process holds a port'},
+      {label:'Files locked by process', cmd:'lsof -p 1842', out:`COMMAND PID USER FD TYPE DEVICE SIZE NODE NAME\nbash   1842 alice  0u  CHR  136,0  0t0    3 /dev/pts/0\nbash   1842 alice  1u  CHR  136,0  0t0    3 /dev/pts/0\nbash   1842 alice  3r  REG    8,1 4096 1234 /etc/config`, note:'See every file a process has open'},
+    ],
+    flow:['lsof reads /proc/PID/fd directories','Resolves file descriptors to names','Queries network connections from kernel','Filters by user/pid/port/directory'],
+    tip:"Can't delete a file because 'device or resource busy'? lsof | grep filename shows which process has it open.",
+  },
+  {
+    id:'rsync', name:'rsync', full:'Remote Sync', level:'advanced',
+    category:'Advanced Tools', shortDesc:'Efficient file synchronization',
+    description:'Syncs files locally or over SSH, transferring only the differences (delta). Essential for backups, deployments, and mirror maintenance. Far more efficient than cp or scp for repeated transfers.',
+    syntax:`<span class="syn-cmd">rsync</span> <span class="syn-opt">[options]</span> <span class="syn-arg">source dest</span>`,
+    flags:[
+      {flag:'-a', desc:'Archive: recursive, preserves everything', ex:'rsync -a src/ dest/'},
+      {flag:'-v', desc:'Verbose output', ex:'rsync -av src/ dest/'},
+      {flag:'-z', desc:'Compress during transfer', ex:'rsync -avz src/ user@host:dest/'},
+      {flag:'-P', desc:'Progress bar + partial file support', ex:'rsync -avzP src/ dest/'},
+      {flag:'--delete', desc:'Remove files from dest not in source', ex:'rsync -av --delete src/ dest/'},
+      {flag:'-n / --dry-run', desc:'Simulate without making changes', ex:'rsync -avn --delete src/ dest/'},
+      {flag:'--exclude', desc:'Skip files matching pattern', ex:"rsync -av --exclude='*.tmp' src/ dst/"},
+    ],
+    examples:[
+      {label:'Local backup', cmd:'rsync -avP /home/alice/ /backup/alice/', out:`sending incremental file list\ndocuments/report_v2.pdf\ndocuments/\nnewfile.txt\n\nsent 14.5K bytes  received 47 bytes  9.7K bytes/sec\ntotal size is 8.2G  speedup is 556,891.00`, note:'Only transfers changed files — incredibly fast on repeat runs'},
+      {label:'Deploy to server', cmd:'rsync -avz --exclude=".git" --exclude="node_modules" ./project/ user@server:/var/www/app/', out:`sending incremental file list\nindex.html\napp.js\nstyles.css\nsent 4.2K bytes`, note:'Efficient web deployment'},
+    ],
+    flow:['rsync generates checksums for source files','Compares with destination checksums','Only transfers new/changed portions (delta)','--delete removes files only in dest'],
+    tip:'Always test with --dry-run first, especially with --delete! rsync -avn --delete lets you see what WOULD happen.',
+  },
+  {
+    id:'iptables', name:'iptables', full:'IP Tables (Firewall)', level:'advanced',
+    category:'Advanced Tools', shortDesc:'Configure Linux firewall',
+    description:'Controls the Linux kernel firewall (netfilter). Filters incoming/outgoing packets by port, protocol, IP address. Complex but powerful — forms the foundation of Linux network security.',
+    syntax:`<span class="syn-cmd">iptables</span> <span class="syn-opt">-[AIDR]</span> <span class="syn-arg">chain rule</span>`,
+    flags:[
+      {flag:'-L', desc:'List all rules', ex:'iptables -L -v -n'},
+      {flag:'-A', desc:'Append rule to chain', ex:'iptables -A INPUT -p tcp --dport 22 -j ACCEPT'},
+      {flag:'-D', desc:'Delete rule from chain', ex:'iptables -D INPUT 3'},
+      {flag:'-I', desc:'Insert rule at position', ex:'iptables -I INPUT 1 -j DROP'},
+      {flag:'-F', desc:'Flush (delete all rules)', ex:'iptables -F'},
+    ],
+    examples:[
+      {label:'View firewall rules', cmd:'iptables -L -v -n --line-numbers', out:`Chain INPUT (policy ACCEPT)\nnum  pkts bytes target     prot opt in  out  source      destination\n  1   123  8456 ACCEPT     tcp  --  *   *    0.0.0.0/0   0.0.0.0/0  tcp dpt:22\n  2  8921  5.2M ACCEPT     tcp  --  *   *    0.0.0.0/0   0.0.0.0/0  tcp dpt:80`, note:'See all firewall rules with stats'},
+      {label:'Allow HTTP/HTTPS', cmd:'iptables -A INPUT -p tcp -m multiport --dports 80,443 -j ACCEPT', out:`# Rule added — HTTP and HTTPS traffic now allowed`, note:''},
+    ],
+    flow:['Packets traverse chains (INPUT/OUTPUT/FORWARD)','Each rule tested in order','First matching rule\'s target applied','Default policy if no match (ACCEPT or DROP)'],
+    warn:'A misconfigured firewall can lock you out of your own server! Always test in a session with console access backup.',
+    tip:'On modern systems, prefer nftables (successor to iptables) or ufw (uncomplicated firewall) for simpler management.',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  VIRTUAL FILESYSTEM & TERMINAL ENGINE
+// ─────────────────────────────────────────────────────────────
+let vfs = {
+  '/': { type: 'd', children: ['home','var','etc','usr','tmp','bin'] },
+  '/home': { type: 'd', children: ['alice'] },
+  '/home/alice': { type: 'd', children: ['Desktop','Documents','Downloads','projects','.bashrc','.bash_history'] },
+  '/home/alice/Desktop': { type: 'd', children: [] },
+  '/home/alice/Documents': { type: 'd', children: ['report.pdf','notes.txt','resume.pdf'] },
+  '/home/alice/Downloads': { type: 'd', children: ['ubuntu.iso','archive.tar.gz'] },
+  '/home/alice/projects': { type: 'd', children: ['linuxhub','myapp'] },
+  '/home/alice/projects/linuxhub': { type: 'd', children: ['index.html','app.js','README.md'] },
+  '/home/alice/projects/myapp': { type: 'd', children: ['main.py','utils.py','requirements.txt'] },
+  '/home/alice/.bashrc': { type: 'f', content: 'export PATH=$PATH:~/.local/bin\nalias ll="ls -lah"\nalias gs="git status"' },
+  '/home/alice/.bash_history': { type: 'f', content: 'ls -la\ncd projects\ngit status\nsudo apt update' },
+  '/var': { type: 'd', children: ['log','www','lib'] },
+  '/var/log': { type: 'd', children: ['syslog','auth.log','nginx'] },
+  '/var/log/syslog': { type: 'f', content: 'Mar 15 10:22:31 linuxhub kernel: boot successful\nMar 15 10:22:35 linuxhub sshd: Server listening on 0.0.0.0 port 22\nMar 15 11:45:12 linuxhub sshd: Accepted publickey for alice\nMar 15 12:00:01 linuxhub CRON: (alice) CMD (/home/alice/backup.sh)' },
+  '/var/log/auth.log': { type: 'f', content: 'Mar 15 11:45:12 linuxhub sshd: Accepted publickey for alice from 192.168.1.10\nMar 15 14:22:33 linuxhub sudo: alice : TTY=pts/0 ; USER=root ; COMMAND=/usr/bin/apt update' },
+  '/var/log/nginx': { type: 'd', children: ['access.log','error.log'] },
+  '/var/www': { type: 'd', children: ['html'] },
+  '/var/www/html': { type: 'd', children: ['index.html'] },
+  '/etc': { type: 'd', children: ['hosts','passwd','nginx','ssh'] },
+  '/etc/hosts': { type: 'f', content: '127.0.0.1 localhost\n127.0.1.1 linuxhub\n::1 localhost ip6-localhost ip6-loopback' },
+  '/etc/passwd': { type: 'f', content: 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nalice:x:1000:1000:Alice Smith:/home/alice:/bin/bash\nbob:x:1001:1001:Bob Jones:/home/bob:/bin/bash' },
+  '/etc/nginx': { type: 'd', children: ['nginx.conf','sites-available'] },
+  '/etc/ssh': { type: 'd', children: ['sshd_config','ssh_config'] },
+  '/usr': { type: 'd', children: ['bin','local','share'] },
+  '/tmp': { type: 'd', children: ['cache.tmp','lock.pid'] },
+  '/bin': { type: 'd', children: ['bash','ls','cp','mv','rm','cat','grep'] },
+};
+
+let cwdPath = '/home/alice';
+let history = [];
+let histIdx = -1;
+
+function resolvePath(p) {
+  if (!p || p === '~') return '/home/alice';
+  if (p.startsWith('~/')) p = '/home/alice/' + p.slice(2);
+  if (!p.startsWith('/')) {
+    p = cwdPath.endsWith('/') ? cwdPath + p : cwdPath + '/' + p;
+  }
+  const parts = p.split('/').filter(Boolean);
+  const resolved = [];
+  for (const part of parts) {
+    if (part === '.') continue;
+    else if (part === '..') resolved.pop();
+    else resolved.push(part);
+  }
+  return '/' + resolved.join('/');
+}
+
+function termLine(content, cls='t-out') {
+  return `<div class="${cls}">${content}</div>`;
+}
+
+function runCmd(raw) {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  history.unshift(trimmed);
+  histIdx = -1;
+
+  const parts = trimmed.split(/\s+/);
+  const cmd = parts[0];
+  const args = parts.slice(1);
+
+  const prompt = `<div class="t-line"><span class="t-prompt">alice@linuxhub:${cwdPath.replace('/home/alice','~')}$</span> <span class="t-cmd">${escH(raw)}</span></div>`;
+
+  switch(cmd) {
+    case 'pwd': return prompt + termLine(cwdPath);
+
+    case 'ls': {
+      let path = cwdPath;
+      let flags = '';
+      for (const a of args) {
+        if (a.startsWith('-')) flags += a;
+        else path = resolvePath(a);
+      }
+      const node = vfs[path];
+      if (!node) return prompt + termLine(`ls: cannot access '${escH(args.find(a=>!a.startsWith('-'))||'.')}': No such file or directory`, 't-err');
+      if (node.type === 'f') return prompt + termLine(path.split('/').pop());
+      const items = node.children || [];
+      if (flags.includes('l')) {
+        const rows = items.map(name => {
+          const childPath = path === '/' ? '/' + name : path + '/' + name;
+          const child = vfs[childPath];
+          const isDir = child && child.type === 'd';
+          const perm = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
+          const cls = isDir ? 't-dir' : (name.startsWith('.') ? 'text2' : 't-file');
+          return `<div class="t-out">${perm}  1 alice users  4096 Mar 15 10:22 <span class="${cls}">${escH(name)}</span></div>`;
+        });
+        return prompt + rows.join('');
+      } else {
+        const names = items.map(name => {
+          const childPath = path === '/' ? '/' + name : path + '/' + name;
+          const child = vfs[childPath];
+          const isDir = child && child.type === 'd';
+          const cls = isDir ? 't-dir' : 't-file';
+          return `<span class="${cls}">${escH(name)}</span>`;
+        });
+        return prompt + `<div class="t-out" style="display:flex;flex-wrap:wrap;gap:8px 16px;">${names.join('')}</div>`;
+      }
+    }
+
+    case 'cd': {
+      const target = resolvePath(args[0] || '~');
+      if (!vfs[target]) return prompt + termLine(`cd: ${escH(target)}: No such file or directory`, 't-err');
+      if (vfs[target].type !== 'd') return prompt + termLine(`cd: ${escH(target)}: Not a directory`, 't-err');
+      cwdPath = target;
+      return prompt;
+    }
+
+    case 'cat': {
+      if (!args.length) return prompt + termLine('cat: missing operand', 't-err');
+      let out = '';
+      for (const a of args) {
+        const p = resolvePath(a);
+        const node = vfs[p];
+        if (!node) { out += termLine(`cat: ${escH(a)}: No such file or directory`, 't-err'); continue; }
+        if (node.type === 'd') { out += termLine(`cat: ${escH(a)}: Is a directory`, 't-err'); continue; }
+        const content = node.content || '(empty file)';
+        out += termLine(escH(content).replace(/\n/g,'<br>'));
+      }
+      return prompt + out;
+    }
+
+    case 'mkdir': {
+      const name = args.find(a => !a.startsWith('-'));
+      if (!name) return prompt + termLine('mkdir: missing operand', 't-err');
+      const newPath = resolvePath(name);
+      if (vfs[newPath]) return prompt + termLine(`mkdir: cannot create directory '${escH(name)}': File exists`, 't-err');
+      const parent = newPath.substring(0, newPath.lastIndexOf('/')) || '/';
+      if (!vfs[parent] && !args.includes('-p')) return prompt + termLine(`mkdir: cannot create directory '${escH(name)}': No such file or directory`, 't-err');
+      vfs[newPath] = { type: 'd', children: [] };
+      if (vfs[parent] && vfs[parent].children) vfs[parent].children.push(newPath.split('/').pop());
+      return prompt + termLine(`<span class="t-success">Directory created: ${escH(newPath)}</span>`);
+    }
+
+    case 'touch': {
+      const names = args.filter(a => !a.startsWith('-'));
+      if (!names.length) return prompt + termLine('touch: missing file operand', 't-err');
+      let out = '';
+      for (const name of names) {
+        const p = resolvePath(name);
+        if (!vfs[p]) {
+          vfs[p] = { type: 'f', content: '' };
+          const parent = p.substring(0, p.lastIndexOf('/')) || '/';
+          if (vfs[parent] && vfs[parent].children) vfs[parent].children.push(p.split('/').pop());
+          out += termLine(`<span class="t-success">Created: ${escH(name)}</span>`);
+        } else {
+          out += termLine(`Updated timestamp: ${escH(name)}`);
+        }
+      }
+      return prompt + out;
+    }
+
+    case 'rm': {
+      const names = args.filter(a => !a.startsWith('-'));
+      if (!names.length) return prompt + termLine('rm: missing operand', 't-err');
+      let out = '';
+      for (const name of names) {
+        const p = resolvePath(name);
+        if (!vfs[p]) { out += termLine(`rm: cannot remove '${escH(name)}': No such file or directory`, 't-err'); continue; }
+        if (vfs[p].type === 'd' && !args.some(a=>a.includes('r'))) {
+          out += termLine(`rm: cannot remove '${escH(name)}': Is a directory. Use -r`, 't-err'); continue;
+        }
+        delete vfs[p];
+        const parent = p.substring(0, p.lastIndexOf('/')) || '/';
+        if (vfs[parent]) vfs[parent].children = (vfs[parent].children||[]).filter(c=>c!==p.split('/').pop());
+        out += termLine(`<span style="color:var(--orange)">Removed: ${escH(name)}</span>`);
+      }
+      return prompt + out;
+    }
+
+    case 'echo': return prompt + termLine(escH(args.join(' ')).replace(/\\n/g,'<br>'));
+
+    case 'whoami': return prompt + termLine('alice');
+    case 'hostname': return prompt + termLine('linuxhub');
+    case 'date': return prompt + termLine(new Date().toString());
+    case 'uptime': return prompt + termLine('10:22:31 up 4 days, 2:15,  2 users,  load average: 0.52, 0.48, 0.44');
+    case 'uname':
+      if (args.includes('-a')) return prompt + termLine('Linux linuxhub 5.15.0-100-generic #110-Ubuntu SMP x86_64 GNU/Linux');
+      if (args.includes('-r')) return prompt + termLine('5.15.0-100-generic');
+      return prompt + termLine('Linux');
+
+    case 'free':
+      return prompt + termLine('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shared&nbsp;&nbsp;buff/cache&nbsp;&nbsp;&nbsp;available') +
+             termLine('Mem:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15.9Gi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.2Gi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1Gi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;420Mi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.1Gi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.8Gi') +
+             termLine('Swap:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0Gi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0Gi');
+
+    case 'df':
+      return prompt +
+        termLine('Filesystem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;&nbsp;Used&nbsp;&nbsp;Avail&nbsp;&nbsp;Use%&nbsp;&nbsp;Mounted on') +
+        termLine('/dev/sda1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;98G&nbsp;&nbsp;&nbsp;45G&nbsp;&nbsp;&nbsp;48G&nbsp;&nbsp;&nbsp;&nbsp;49%&nbsp;&nbsp;/') +
+        termLine('/dev/sda2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;500G&nbsp;&nbsp;380G&nbsp;&nbsp;120G&nbsp;&nbsp;&nbsp;76%&nbsp;&nbsp;/data') +
+        termLine('tmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.8G&nbsp;&nbsp;1.2G&nbsp;&nbsp;&nbsp;6.6G&nbsp;&nbsp;&nbsp;16%&nbsp;&nbsp;/run');
+
+    case 'ps':
+      return prompt +
+        termLine('USER&nbsp;&nbsp;&nbsp;&nbsp;PID&nbsp;&nbsp;%CPU&nbsp;%MEM&nbsp;&nbsp;&nbsp;VSZ&nbsp;&nbsp;&nbsp;RSS&nbsp;&nbsp;TTY&nbsp;&nbsp;STAT&nbsp;&nbsp;COMMAND') +
+        termLine('alice&nbsp;&nbsp;&nbsp;&nbsp;1842&nbsp;&nbsp;0.0&nbsp;&nbsp;0.1&nbsp;&nbsp;8192&nbsp;&nbsp;4096&nbsp;&nbsp;pts/0&nbsp;&nbsp;Ss&nbsp;&nbsp;&nbsp;/bin/bash') +
+        termLine('alice&nbsp;&nbsp;&nbsp;&nbsp;2341&nbsp;&nbsp;0.2&nbsp;&nbsp;1.4&nbsp;98765&nbsp;56789&nbsp;&nbsp;pts/0&nbsp;&nbsp;Sl+&nbsp;&nbsp;/usr/bin/node app.js') +
+        termLine('alice&nbsp;&nbsp;&nbsp;&nbsp;3100&nbsp;&nbsp;0.0&nbsp;&nbsp;0.0&nbsp;&nbsp;5432&nbsp;&nbsp;1024&nbsp;&nbsp;pts/0&nbsp;&nbsp;R+&nbsp;&nbsp;&nbsp;ps aux');
+
+    case 'ping': {
+      const host = args.find(a=>!a.startsWith('-')) || 'localhost';
+      const count = (() => { const ci = args.indexOf('-c'); return ci>=0 ? parseInt(args[ci+1])||4 : 4; })();
+      let lines = `PING ${escH(host)} (93.184.216.34): 56(84) bytes of data.<br>`;
+      for(let i=1;i<=count;i++) lines += `64 bytes from 93.184.216.34: icmp_seq=${i} ttl=56 time=${(Math.random()*10+8).toFixed(1)} ms<br>`;
+      lines += `<br>--- ${escH(host)} ping statistics ---<br>${count} packets transmitted, ${count} received, 0% packet loss`;
+      return prompt + termLine(lines, 't-success');
+    }
+
+    case 'clear':
+    case 'reset': {
+      document.getElementById('terminalBody').innerHTML = '';
+      return '';
+    }
+
+    case 'history': {
+      const h = history.slice().reverse();
+      return prompt + h.slice(0,20).map((c,i)=>`<div class="t-out">&nbsp;&nbsp;${String(i+1).padStart(3)} ${escH(c)}</div>`).join('');
+    }
+
+    case 'grep': {
+      const patternIdx = args.findIndex(a=>!a.startsWith('-'));
+      if (patternIdx < 0) return prompt + termLine('grep: missing pattern', 't-err');
+      const pattern = args[patternIdx];
+      const fileArg = args[patternIdx+1];
+      if (fileArg) {
+        const p = resolvePath(fileArg);
+        const node = vfs[p];
+        if (!node || node.type==='d') return prompt + termLine(`grep: ${escH(fileArg)}: No such file or cannot read`, 't-err');
+        const lines = (node.content||'').split('\n');
+        const matches = lines.filter(l => l.toLowerCase().includes(pattern.toLowerCase()));
+        if (!matches.length) return prompt + termLine(`(no matches for '${escH(pattern)}')`, 't-info');
+        return prompt + matches.map(l => termLine(escH(l).replace(new RegExp(escH(pattern),'gi'),m=>`<span style="color:var(--red);font-weight:bold">${m}</span>`))).join('');
+      }
+      return prompt + termLine(`(grep requires a file in this simulator)`, 't-info');
+    }
+
+    case 'wc': {
+      const fname = args.find(a=>!a.startsWith('-'));
+      if (!fname) return prompt + termLine('wc: missing file operand', 't-err');
+      const p = resolvePath(fname);
+      const node = vfs[p];
+      if (!node || node.type==='d') return prompt + termLine(`wc: ${escH(fname)}: No such file or directory`, 't-err');
+      const content = node.content || '';
+      const lines = content.split('\n').length;
+      const words = content.split(/\s+/).filter(Boolean).length;
+      const bytes = content.length;
+      return prompt + termLine(`${String(lines).padStart(5)} ${String(words).padStart(6)} ${String(bytes).padStart(6)} ${escH(fname)}`);
+    }
+
+    case 'chmod': return prompt + termLine(`<span class="t-success">Permissions changed</span>`);
+    case 'chown': return prompt + termLine(`<span class="t-success">Ownership changed</span>`);
+    case 'sudo': return prompt + termLine(`[sudo] password for alice: `, 't-info') + termLine(`<span class="t-success">Running: ${escH(args.join(' '))}</span>`);
+    case 'which': return prompt + termLine(`/usr/bin/${escH(args[0]||'command')}`);
+    case 'man': return prompt + termLine(`<span class="t-info">Man pages not available. Click the command in the sidebar for full docs!</span>`);
+
+    case 'help':
+    case '--help': {
+      return prompt + 
+        termLine('<span class="t-success">LinuxHub Interactive Terminal</span>') +
+        termLine('') +
+        termLine('<span class="t-info">Supported commands:</span>') +
+        termLine('pwd, ls, cd, cat, mkdir, touch, rm, echo, whoami, hostname') +
+        termLine('date, uptime, uname, free, df, ps, ping, grep, wc, chmod, chown') +
+        termLine('sudo, which, history, clear') +
+        termLine('') +
+        termLine('Tip: click any command in the sidebar for full documentation!', 't-info');
+    }
+
+    default:
+      return prompt + termLine(`<span class="t-err">bash: ${escH(cmd)}: command not found</span>`) + termLine(`<span class="t-info">Try: help | Or search the sidebar for '${escH(cmd)}'</span>`);
+  }
+}
+
+function escH(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TERMINAL UI
+// ─────────────────────────────────────────────────────────────
+function appendTerminal(html) {
+  const body = document.getElementById('terminalBody');
+  body.insertAdjacentHTML('beforeend', html);
+  body.scrollTop = body.scrollHeight;
+}
+
+function runTermCmd() {
+  const input = document.getElementById('termInput');
+  const val = input.value.trim();
+  if (!val) return;
+  const out = runCmd(val);
+  if (out) appendTerminal(out);
+  input.value = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('termInput');
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { runTermCmd(); }
+    else if (e.key === 'ArrowUp') {
+      if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
+      e.preventDefault();
+    } else if (e.key === 'ArrowDown') {
+      if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
+      else { histIdx = -1; input.value = ''; }
+      e.preventDefault();
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      // Simple autocomplete
+      const parts = input.value.split(' ');
+      const last = parts[parts.length-1];
+      if (last) {
+        const p = resolvePath(last);
+        const parent = p.substring(0, p.lastIndexOf('/')) || '/';
+        const base = p.split('/').pop();
+        const node = vfs[parent];
+        if (node && node.children) {
+          const matches = node.children.filter(c=>c.startsWith(base));
+          if (matches.length === 1) {
+            parts[parts.length-1] = (last.includes('/') ? last.substring(0,last.lastIndexOf('/')+1) : '') + matches[0];
+            input.value = parts.join(' ');
+          }
+        }
+      }
+    }
+  });
+
+  // Initial terminal greeting
+  appendTerminal(
+    termLine(`<span class="t-success">Welcome to LinuxHub Terminal Simulator!</span>`) +
+    termLine(`<span class="t-info">Type commands to explore. Try: ls, pwd, cd projects, cat /etc/hosts</span>`) +
+    termLine(`<span class="t-info">Type 'help' for available commands. Arrow keys for history, Tab for autocomplete.</span>`) +
+    termLine(``)
+  );
+
+  buildSidebar();
+  renderWelcome();
+  updateQuickBtns(null);
+});
+
+// ─────────────────────────────────────────────────────────────
+//  SIDEBAR
+// ─────────────────────────────────────────────────────────────
+const CATEGORY_COLORS = {
+  'Navigation': '#26a641',
+  'File Operations': '#58d0e8',
+  'Text Processing': '#a78bfa',
+  'Process Management': '#e3c75b',
+  'Permissions': '#f0833a',
+  'System Info': '#f85149',
+  'Networking': '#58d0e8',
+  'Advanced Search': '#e3c75b',
+  'Scripting': '#a78bfa',
+  'Advanced Tools': '#f0833a',
+};
+
+let currentLevel = 'all';
+let currentCmd = null;
+
+function buildSidebar(filterLevel='all', searchTerm='') {
+  const list = document.getElementById('cmdList');
+  const categories = {};
+  for (const cmd of commands) {
+    if (filterLevel !== 'all' && cmd.level !== filterLevel) continue;
+    if (searchTerm && !cmd.name.includes(searchTerm.toLowerCase()) && !cmd.shortDesc.toLowerCase().includes(searchTerm.toLowerCase()) && !cmd.full.toLowerCase().includes(searchTerm.toLowerCase())) continue;
+    if (!categories[cmd.category]) categories[cmd.category] = [];
+    categories[cmd.category].push(cmd);
+  }
+  list.innerHTML = '';
+  for (const [catName, cmds] of Object.entries(categories)) {
+    const color = CATEGORY_COLORS[catName] || '#666';
+    const catDiv = document.createElement('div');
+    catDiv.className = 'cmd-category';
+    catDiv.innerHTML = `
+      <div class="cat-header" onclick="toggleCat(this)">
+        <div class="cat-dot" style="background:${color}"></div>
+        ${catName}
+        <span class="cat-arrow open">▶</span>
+      </div>
+      <div class="cat-items open">
+        ${cmds.map(cmd => `
+          <div class="cmd-item ${currentCmd && currentCmd.id===cmd.id?'active':''}" onclick="selectCmd('${cmd.id}')" id="item-${cmd.id}">
+            <div>
+              <div class="cmd-item-name">${cmd.name}</div>
+              <div class="cmd-item-desc">${cmd.shortDesc}</div>
+            </div>
+            <span class="level-badge lb-${cmd.level.slice(0,3)}">${cmd.level==='beginner'?'BEG':cmd.level==='intermediate'?'INT':'ADV'}</span>
+          </div>
+        `).join('')}
+      </div>`;
+    list.appendChild(catDiv);
+  }
+  if (!list.innerHTML) {
+    list.innerHTML = `<div style="padding:16px;color:var(--text3);font-size:12px;text-align:center;">No commands found</div>`;
+  }
+}
+
+function toggleCat(header) {
+  const arrow = header.querySelector('.cat-arrow');
+  const items = header.nextElementSibling;
+  const isOpen = items.classList.contains('open');
+  items.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+
+function filterLevel(level, btn) {
+  currentLevel = level;
+  document.querySelectorAll('.level-tab').forEach(b => {
+    b.className = 'level-tab';
+  });
+  if (level === 'all') btn.className = 'level-tab active-beg';
+  else if (level === 'beginner') btn.className = 'level-tab active-beg';
+  else if (level === 'intermediate') btn.className = 'level-tab active-int';
+  else btn.className = 'level-tab active-adv';
+  buildSidebar(currentLevel, document.getElementById('searchInput').value);
+}
+
+function filterCommands(term) {
+  buildSidebar(currentLevel, term);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  COMMAND DOC RENDER
+// ─────────────────────────────────────────────────────────────
+function selectCmd(id) {
+  const cmd = commands.find(c => c.id === id);
+  if (!cmd) return;
+  currentCmd = cmd;
+
+  // Update active in sidebar
+  document.querySelectorAll('.cmd-item').forEach(el => el.classList.remove('active'));
+  const item = document.getElementById(`item-${id}`);
+  if (item) { item.classList.add('active'); item.scrollIntoView({ block: 'nearest' }); }
+
+  // Update breadcrumb
+  document.getElementById('breadcrumb').innerHTML = `
+    <span style="color:var(--text3)">~</span>
+    <span style="color:var(--text3)">/</span>
+    <span style="cursor:pointer;color:var(--text2);" onclick="renderWelcome()">LinuxHub</span>
+    <span style="color:var(--text3)">/</span>
+    <span style="color:var(--text2)">${cmd.category}</span>
+    <span style="color:var(--text3)">/</span>
+    <span class="cmd-name">${cmd.name}</span>
+  `;
+
+  updateQuickBtns(cmd);
+
+  const levelColor = cmd.level==='beginner' ? 'var(--green)' : cmd.level==='intermediate' ? 'var(--purple)' : 'var(--orange)';
+  const levelBg = cmd.level==='beginner' ? '#162a1e' : cmd.level==='intermediate' ? '#1e1e2a' : '#2a1a10';
+
+  const flagsHtml = cmd.flags ? `
+    <div class="section">
+      <div class="section-title">Flags & Options</div>
+      <table class="flags-table">
+        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+        <tbody>
+          ${cmd.flags.map(f => `
+            <tr>
+              <td><div class="flag-code">${escH(f.flag)}</div></td>
+              <td>
+                <div class="flag-desc">${escH(f.desc)}</div>
+                ${f.ex ? `<div class="flag-example">$ ${escH(f.ex)}</div>` : ''}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  ` : '';
+
+  const examplesHtml = cmd.examples ? `
+    <div class="section">
+      <div class="section-title">Examples</div>
+      ${cmd.examples.map(ex => `
+        <div class="example-card">
+          <div class="example-header">
+            <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <span class="example-label">${escH(ex.label)}</span>
+          </div>
+          <div class="example-body">
+            <div class="example-cmd">${escH(ex.cmd)}</div>
+            ${ex.out ? `<div class="example-out">${escH(ex.out)}</div>` : ''}
+            ${ex.note ? `<div class="example-note">${escH(ex.note)}</div>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  const flowHtml = cmd.flow ? `
+    <div class="section">
+      <div class="section-title">How It Works</div>
+      <div class="flow-box">
+        ${cmd.flow.map((step, i) => `
+          ${i > 0 ? '<div class="flow-arrow">↓</div>' : ''}
+          <div class="flow-step ${i===0||i===cmd.flow.length-1?'hl':''}">${escH(step)}</div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const tipHtml = cmd.tip ? `
+    <div class="tip-box"><strong>💡 Pro Tip:</strong> ${escH(cmd.tip)}</div>
+  ` : '';
+
+  const warnHtml = cmd.warn ? `
+    <div class="warn-box"><strong>⚠️ Warning:</strong> ${escH(cmd.warn)}</div>
+  ` : '';
+
+  const tryBtn = `
+    <button onclick="tryCmdInTerminal('${cmd.name}')" style="
+      background: var(--greenDim); border: 1px solid var(--green3);
+      color: var(--green); font-family: var(--mono); font-size: 12px;
+      padding: 6px 14px; border-radius: 5px; cursor: pointer;
+      transition: all 0.15s; margin-top: 4px;
+    " onmouseover="this.style.background='var(--green3)';this.style.color='#fff'"
+       onmouseout="this.style.background='var(--greenDim)';this.style.color='var(--green)'">
+      ▶ Try in Terminal
+    </button>
+  `;
+
+  document.getElementById('docPanel').innerHTML = `
+    <div class="cmd-hero">
+      <div class="cmd-hero-top">
+        <span class="cmd-big-name">${escH(cmd.name)}</span>
+        <span class="cmd-level-pill" style="background:${levelBg};color:${levelColor};border:1px solid ${levelColor}33;">${cmd.level.toUpperCase()}</span>
+      </div>
+      <div class="cmd-full-name">${escH(cmd.full)}</div>
+      <div class="cmd-description">${escH(cmd.description)}</div>
+      <div style="margin-top:12px">${tryBtn}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Syntax</div>
+      <div class="syntax-block">${cmd.syntax}</div>
+    </div>
+
+    ${flagsHtml}
+    ${warnHtml}
+    ${tipHtml}
+    ${examplesHtml}
+    ${flowHtml}
+  `;
+}
+
+function tryCmdInTerminal(name) {
+  const input = document.getElementById('termInput');
+  input.value = name + ' ';
+  input.focus();
+}
+
+function updateQuickBtns(cmd) {
+  const container = document.getElementById('quickBtns');
+  const defaults = ['ls -lah', 'pwd', 'cat /etc/hosts', 'ps aux', 'df -h', 'free -h', 'uname -a'];
+  const cmds = cmd ? [cmd.name, ...(cmd.examples||[]).slice(0,2).map(e=>e.cmd.split('\n')[0])] : defaults;
+  container.innerHTML = cmds.slice(0,5).map(c =>
+    `<button class="qbtn" onclick="quickRun(this.textContent)">${escH(c)}</button>`
+  ).join('');
+}
+
+function quickRun(cmd) {
+  document.getElementById('termInput').value = cmd;
+  runTermCmd();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  WELCOME SCREEN
+// ─────────────────────────────────────────────────────────────
+function renderWelcome() {
+  currentCmd = null;
+  document.querySelectorAll('.cmd-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('breadcrumb').innerHTML = `
+    <span style="color:var(--text3)">~</span>
+    <span style="color:var(--text3)">/</span>
+    <span>LinuxHub</span>
+  `;
+
+  const begCount = commands.filter(c=>c.level==='beginner').length;
+  const intCount = commands.filter(c=>c.level==='intermediate').length;
+  const advCount = commands.filter(c=>c.level==='advanced').length;
+
+  document.getElementById('docPanel').innerHTML = `
+    <div class="welcome-screen">
+      <span class="welcome-badge">v2.0 — Interactive Learning Platform</span>
+      <h1 class="welcome-title">Master<br>the <span>Terminal</span></h1>
+      <p class="welcome-sub">
+        A hands-on Linux command reference with live examples, interactive terminal,
+        and step-by-step explanations from beginner to advanced.
+        Click any command in the sidebar to explore.
+      </p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--green)">${commands.length}</div>
+          <div class="stat-label">Commands covered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--cyan)">${Object.keys(CATEGORY_COLORS).length}</div>
+          <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--purple)">∞</div>
+          <div class="stat-label">Try in live terminal</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-family:var(--mono);margin-bottom:12px">Start Your Journey</div>
+      <div class="path-cards">
+        <div class="path-card" onclick="filterLevel('beginner', document.querySelectorAll('.level-tab')[1]); buildSidebar('beginner',''); selectCmd('ls')">
+          <div class="path-card-icon" style="font-size:24px;margin-bottom:8px">🌱</div>
+          <div class="path-card-title" style="color:var(--green)">Beginner</div>
+          <div class="path-card-desc">${begCount} commands — navigation, files, text, permissions</div>
+        </div>
+        <div class="path-card" onclick="filterLevel('intermediate', document.querySelectorAll('.level-tab')[2]); buildSidebar('intermediate',''); selectCmd('sed')">
+          <div class="path-card-icon" style="font-size:24px;margin-bottom:8px">⚡</div>
+          <div class="path-card-title" style="color:var(--purple)">Intermediate</div>
+          <div class="path-card-desc">${intCount} commands — sed, awk, find, ssh, scripting</div>
+        </div>
+        <div class="path-card" onclick="filterLevel('advanced', document.querySelectorAll('.level-tab')[3]); buildSidebar('advanced',''); selectCmd('strace')">
+          <div class="path-card-icon" style="font-size:24px;margin-bottom:8px">🔥</div>
+          <div class="path-card-title" style="color:var(--orange)">Advanced</div>
+          <div class="path-card-desc">${advCount} commands — strace, tmux, iptables, rsync</div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;padding:16px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;max-width:600px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-family:var(--mono);margin-bottom:10px">Quick Try in Terminal →</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${['ls -lah','cat /etc/passwd','ps aux','df -h','ping -c3 google.com','grep root /etc/passwd','uname -a'].map(c=>
+            `<button class="qbtn" onclick="quickRun('${c}')">${c}</button>`
+          ).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
